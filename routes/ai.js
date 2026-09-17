@@ -20,7 +20,9 @@ const router = express.Router();
 router.use(requireUser);
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'public', 'uploads');
-fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// existsSync guard: see server.js's copy of this comment (symlink + recursive
+// mkdirSync throws ENOENT on a cloud deploy with a mounted volume).
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const qCountToday = db.prepare(
   `SELECT COUNT(*) AS n FROM ai_generations WHERE user_id = ? AND created_at > datetime('now', '-1 day')`

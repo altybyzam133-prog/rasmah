@@ -26,7 +26,9 @@ router.use(requireUser);
 router.use(stockLimiter);
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'public', 'uploads');
-fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// existsSync guard: see server.js's copy of this comment (symlink + recursive
+// mkdirSync throws ENOENT on a cloud deploy with a mounted volume).
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const qInsertUpload = db.prepare(
   `INSERT INTO uploads (user_id, url, original_name, mime, size) VALUES (@user_id, @url, @original_name, @mime, @size)`

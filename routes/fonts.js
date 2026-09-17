@@ -19,7 +19,9 @@ const router = express.Router();
 router.use(requireUser);
 
 const FONT_DIR = path.join(__dirname, '..', 'public', 'uploads', 'fonts');
-fs.mkdirSync(FONT_DIR, { recursive: true });
+// existsSync guard: see server.js's copy of this comment (symlink + recursive
+// mkdirSync throws ENOENT on a cloud deploy with a mounted volume).
+if (!fs.existsSync(FONT_DIR)) fs.mkdirSync(FONT_DIR, { recursive: true });
 
 const ALLOWED_EXT = new Set(['.ttf', '.otf', '.woff', '.woff2']);
 

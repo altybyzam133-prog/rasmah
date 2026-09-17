@@ -24,9 +24,16 @@ const qrcodeRoutes = require('./routes/qrcode');
 const fontRoutes = require('./routes/fonts');
 const adminRoutes = require('./routes/admin');
 
-// make sure runtime folders exist
+// make sure runtime folders exist. Guarded on existsSync first, not just a
+// bare recursive mkdirSync: on a cloud deploy with a mounted volume, `data`/
+// `public/uploads` are symlinks to that volume (see
+// scripts/link-persistent-dir.js) by the time this runs, and a plain
+// `mkdirSync(existingSymlinkToDir, {recursive:true})` throws ENOENT instead
+// of the silent no-op a real directory would get — confirmed this exact
+// crash on a real Railway deploy before adding the guard, not theorized.
 for (const d of ['data', 'public/uploads', 'public/vendor', 'public/fonts']) {
-  fs.mkdirSync(path.join(__dirname, d), { recursive: true });
+  const full = path.join(__dirname, d);
+  if (!fs.existsSync(full)) fs.mkdirSync(full, { recursive: true });
 }
 
 const app = express();

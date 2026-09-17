@@ -13,7 +13,11 @@ const router = express.Router();
 router.use(requireUser);
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'public', 'uploads');
-fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// existsSync guard: see server.js's own copy of this comment — a plain
+// recursive mkdirSync throws ENOENT when the target is already a symlink
+// (true on a cloud deploy with a mounted volume), not a no-op like it would
+// be for a real directory.
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const ALLOWED = {
   'image/png': '.png',
