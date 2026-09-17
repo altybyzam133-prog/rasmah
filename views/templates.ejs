@@ -1,0 +1,40 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+
+<section class="wrap tpl-page">
+  <div class="tpl-head">
+    <h1><%= t('tpl_title') %></h1>
+    <p class="muted"><%= t('tpl_sub') %></p>
+  </div>
+
+  <nav class="tpl-filters">
+    <a href="/templates" class="chip <%= activeCat === 'all' ? 'active' : '' %>"><%= t('tpl_cat_all') %></a>
+    <% categories.forEach(function(c){ %>
+      <a href="/templates?category=<%= c %>" class="chip <%= activeCat === c ? 'active' : '' %>"><%= t('tpl_cat_' + c) %></a>
+    <% }); %>
+  </nav>
+
+  <% if (!templates.length) { %>
+    <p class="empty-line muted"><%= t('tpl_empty') %></p>
+  <% } else { %>
+    <div class="tpl-grid">
+      <% templates.forEach(function(tpl){ %>
+        <article class="tpl-card">
+          <div class="tpl-card-thumb" style="aspect-ratio: <%= tpl.width %> / <%= tpl.height %>">
+            <% if (tpl.thumbnail) { %><img src="<%= tpl.thumbnail %>" alt="<%= field(tpl,'name') %>" loading="lazy"><% } %>
+          </div>
+          <div class="tpl-card-body">
+            <span class="tpl-card-name"><%= field(tpl, 'name') %></span>
+            <span class="tpl-card-dim muted"><%= tpl.width %>×<%= tpl.height %></span>
+          </div>
+          <a class="btn btn-primary btn-sm tpl-card-use"
+             href="<%= user ? '/use-template/' + tpl.id : '/register?next=' + encodeURIComponent('/use-template/' + tpl.id) %>">
+            <%= t('tpl_use') %>
+          </a>
+        </article>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

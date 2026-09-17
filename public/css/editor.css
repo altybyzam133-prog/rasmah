@@ -1,0 +1,938 @@
+/* =========================================================================
+   رسمة / Rasmah — editor stylesheet (full-screen app)
+   ========================================================================= */
+
+:root {
+  --bg: #f6f5fb;
+  --surface: #ffffff;
+  --surface-2: #f0eef8;
+  --panel: #ffffff;
+  --border: #e6e3f0;
+  --border-strong: #d6d2e6;
+  --text: #1b1830;
+  --muted: #6c6883;
+  --primary: #7c5cff;
+  --primary-hover: #6a48f0;
+  --primary-soft: #efeaff;
+  --danger: #e5484d;
+  --ok: #1f9d63;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --topbar-h: 56px;
+  --left-w: 300px;
+  --right-w: 268px;
+  --tabs-w: 72px;
+  --bottombar-h: 60px;
+  /* live-updated by core.js from window.visualViewport when the on-screen
+     keyboard is open (0 otherwise) — see the mobile floatbar rule below */
+  --kb-inset: 0px;
+  --font: "Cairo", "Tajawal", "Segoe UI", Tahoma, system-ui, -apple-system, "Noto Sans Arabic", sans-serif;
+  --font-display: "Poppins", "Cairo", var(--font);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body.editor-body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  overflow: hidden;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; color: inherit; cursor: pointer; }
+h3 { font-family: var(--font-display); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 18px 0 10px; }
+h3:first-child { margin-top: 4px; }
+.ic { width: 18px; height: 18px; flex: none; }
+.ed-hint { color: var(--muted); font-size: .85rem; padding: 10px 2px; }
+.ed-sep { width: 1px; height: 22px; background: var(--border-strong); margin-inline: 4px; }
+.ed-block, .ed-glabel { display: block; }
+.ed-glabel { font-size: .78rem; font-weight: 700; color: var(--muted); margin: 12px 0 6px; }
+
+/* ---- topbar ------------------------------------------------------------- */
+.ed-topbar {
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 30;
+}
+.ed-top-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.ed-top-center { display: flex; align-items: center; gap: 2px; }
+.ed-top-right { display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; }
+.ed-brand-logo { width: 24px; height: 24px; }
+.ed-title-input {
+  border: 1px solid transparent;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  max-width: 320px;
+  min-width: 80px;
+}
+.ed-title-input:hover { background: var(--surface-2); }
+.ed-title-input:focus { outline: none; border-color: var(--primary); background: var(--surface); }
+
+.ed-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+.ed-icon-btn:hover { background: var(--surface-2); }
+.ed-icon-btn:disabled { opacity: .35; cursor: default; }
+.ed-icon-btn:disabled:hover { background: transparent; }
+.ed-zoom-val {
+  min-width: 52px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: .85rem;
+  border-radius: var(--radius-sm);
+  padding: 6px 4px;
+}
+.ed-zoom-val:hover { background: var(--surface-2); }
+
+.ed-save-pill { font-size: .8rem; color: var(--muted); font-weight: 600; min-width: 76px; text-align: end; }
+.ed-save-pill.saving { color: var(--primary); }
+.ed-save-pill.unsaved { color: #b7791f; }
+.ed-save-pill.error { color: var(--danger); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; border-radius: 999px; font-weight: 600; padding: 8px 14px; font-size: .85rem; }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(124,92,255,.3); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-ghost { border-color: var(--border-strong); background: transparent; }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn-sm { padding: 6px 12px; font-size: .8rem; }
+.lang-switch { font-size: .8rem; font-weight: 600; color: var(--muted); padding: 6px 8px; border-radius: 999px; text-decoration: none; }
+.lang-switch:hover { background: var(--surface-2); color: var(--text); }
+
+.ed-dropdown { position: relative; }
+.ed-dropdown-menu {
+  position: absolute;
+  inset-block-start: calc(100% + 6px);
+  inset-inline-end: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(20,16,50,.16);
+  padding: 6px;
+  min-width: 190px;
+  display: grid;
+  gap: 2px;
+  z-index: 40;
+}
+.ed-dropdown-menu[hidden] { display: none; }
+.ed-dropdown-menu > button {
+  text-align: start;
+  border: none;
+  background: transparent;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  font-weight: 600;
+}
+.ed-dropdown-menu > button:hover { background: var(--primary-soft); }
+.ed-dd-check, .ed-dd-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: .8rem; color: var(--muted); }
+.ed-dd-check[hidden], .ed-dd-row[hidden] { display: none; }
+.ed-dd-row { justify-content: space-between; border-top: 1px solid var(--border); margin-top: 2px; }
+.ed-dd-row select { border: 1px solid var(--border-strong); border-radius: 6px; padding: 2px 4px; }
+
+.ed-share-menu { min-width: 280px; padding: 12px; }
+.ed-share-desc { font-size: .78rem; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
+.ed-share-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.ed-share-row input {
+  flex: 1; min-width: 0;
+  border: 1px solid var(--border-strong); border-radius: 6px;
+  padding: 6px 8px; font-size: .78rem; background: var(--surface-2);
+}
+.ed-share-disable {
+  display: block; width: 100%; margin-top: 6px;
+  border: none; background: transparent; color: var(--danger);
+  font-size: .78rem; font-weight: 600; padding: 6px;
+}
+.ed-share-disable:hover { background: #fdecec; border-radius: 6px; }
+
+.ed-history-menu { min-width: 300px; max-width: 340px; padding: 12px; }
+.ed-history-list { max-height: 360px; overflow-y: auto; display: grid; gap: 4px; }
+.ed-history-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px; border-radius: var(--radius-sm);
+}
+.ed-history-row:hover { background: var(--surface-2); }
+.ed-history-thumb {
+  width: 40px; height: 40px; flex: none; border-radius: 6px; overflow: hidden;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.ed-history-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ed-history-time { flex: 1; font-size: .78rem; color: var(--muted); }
+
+.ed-shortcuts-menu { min-width: 320px; max-width: 360px; padding: 12px; }
+.ed-shortcut-list { max-height: 340px; overflow-y: auto; display: grid; gap: 2px; }
+.ed-shortcut-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 6px 4px; font-size: .8rem;
+}
+.ed-shortcut-row span { color: var(--muted); }
+.ed-shortcut-row kbd {
+  font-family: inherit; font-size: .74rem; font-weight: 700; white-space: nowrap;
+  background: var(--surface-2); border: 1px solid var(--border-strong);
+  border-radius: 6px; padding: 3px 7px;
+}
+
+.ed-savetpl-menu { min-width: 260px; padding: 12px; }
+.ed-savetpl-field { display: grid; gap: 4px; font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+.ed-savetpl-field input {
+  border: 1px solid var(--border-strong); border-radius: 6px;
+  padding: 7px 9px; font-size: .85rem; background: var(--surface-2); width: 100%;
+}
+
+.ed-resize-menu { min-width: 300px; max-width: 340px; padding: 12px; }
+.ed-resize-groups { max-height: 280px; overflow-y: auto; display: grid; gap: 4px; margin-bottom: 10px; }
+.ed-resize-group-title {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em;
+  color: var(--muted); padding: 8px 4px 2px;
+}
+.ed-resize-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; text-align: start; border: none; background: transparent;
+  padding: 7px 8px; border-radius: var(--radius-sm); font-size: .82rem; font-weight: 600;
+}
+.ed-resize-item:hover { background: var(--primary-soft); }
+.ed-resize-item small { font-weight: 500; color: var(--muted); font-size: .72rem; white-space: nowrap; }
+.ed-resize-custom { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 2px; }
+.ed-resize-custom label { flex: 1; display: grid; gap: 3px; font-size: .72rem; color: var(--muted); }
+.ed-resize-custom input {
+  border: 1px solid var(--border-strong); border-radius: 6px;
+  padding: 6px 8px; font-size: .8rem; background: var(--surface-2); width: 100%;
+}
+
+/* ---- main split ------------------------------------------------------------ */
+.ed-main {
+  height: calc(100% - var(--topbar-h));
+  display: grid;
+  grid-template-columns: calc(var(--tabs-w) + var(--left-w)) 1fr var(--right-w);
+}
+
+/* ---- left ----------------------------------------------------------------- */
+.ed-left { display: grid; grid-template-columns: var(--tabs-w) var(--left-w); border-inline-end: 1px solid var(--border); background: var(--panel); min-height: 0; }
+/* min-height:0 lets it actually shrink to .ed-left's grid-row height instead
+   of growing past it — a prerequisite for overflow-y to engage at all; with
+   15 tabs now (was 13), a short laptop window can run out of vertical room
+   for the full list otherwise, silently clipping the last few tabs. */
+.ed-tabs { display: flex; flex-direction: column; gap: 2px; padding: 8px 6px; background: var(--surface-2); border-inline-end: 1px solid var(--border); min-height: 0; overflow-y: auto; }
+.ed-tab {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: 9px 4px;
+  color: var(--muted);
+  font-size: .62rem;
+  font-weight: 700;
+}
+.ed-tab span { line-height: 1.1; text-align: center; }
+.ed-tab:hover { background: var(--surface); color: var(--text); }
+.ed-tab.active { background: var(--primary-soft); color: var(--primary); }
+
+.ed-panels { position: relative; min-height: 0; overflow-y: auto; padding: 12px 14px 40px; }
+.ed-panel { display: none; }
+.ed-panel.active { display: block; }
+
+.ed-tpl-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ed-tpl-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.ed-tpl-item img { width: 100%; height: 100%; object-fit: cover; }
+.ed-tpl-item:hover { border-color: var(--primary); }
+.ed-tpl-item:hover .ed-upload-del { display: block; }
+.ed-tpl-name {
+  position: absolute; inset-inline: 0; inset-block-end: 0;
+  font-size: .68rem; font-weight: 600; color: #fff; padding: 4px 6px;
+  background: linear-gradient(to top, rgba(0,0,0,.6), transparent);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.ed-shape-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ed-shape-grid button, .ed-font-list button, .ed-swatches button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+}
+.ed-shape-grid button:hover { border-color: var(--primary); background: var(--primary-soft); }
+.sh { display: block; background: #8a83a6; }
+.sh-rect { width: 26px; height: 18px; }
+.sh-rounded { width: 26px; height: 18px; border-radius: 6px; }
+.sh-circle { width: 24px; height: 24px; border-radius: 50%; }
+.sh-ellipse { width: 28px; height: 18px; border-radius: 50%; }
+.sh-triangle { width: 0; height: 0; background: transparent; border-inline: 14px solid transparent; border-block-end: 24px solid #8a83a6; }
+.sh-line { width: 28px; height: 4px; border-radius: 2px; }
+.sh-arrow, .sh-star { background: transparent; font-size: 20px; color: #8a83a6; }
+
+.ed-search {
+  display: block; width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  padding: 8px 10px; font-size: .82rem; background: var(--surface-2); margin: 8px 0;
+}
+.ed-search:focus { outline: none; border-color: var(--primary); }
+.ed-ai-prompt {
+  display: block; width: 100%; resize: vertical; min-height: 64px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  padding: 8px 10px; font-size: .82rem; background: var(--surface-2);
+  margin: 8px 0; font-family: inherit;
+}
+.ed-ai-prompt:focus { outline: none; border-color: var(--primary); }
+.ed-removebg-preview img {
+  display: block; width: 100%; max-height: 220px; object-fit: contain;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); margin: 10px 0;
+  background: repeating-conic-gradient(#eceaf3 0% 25%, #f4f2f9 0% 50%) 50% / 16px 16px;
+}
+.ed-upload-drop.disabled { opacity: .5; pointer-events: none; }
+.ed-el-filters { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.ed-el-chip {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.ed-el-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.ed-el-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ed-el-item {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  aspect-ratio: 1 / 1;
+  padding: 9px;
+  display: grid;
+  place-items: center;
+}
+.ed-el-item:hover { border-color: var(--primary); background: var(--primary-soft); }
+.ed-el-item svg { width: 100%; height: 100%; }
+
+.ed-text-add { display: grid; gap: 8px; }
+.ed-text-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: start;
+  font-weight: 700;
+}
+.ed-text-btn:hover { border-color: var(--primary); }
+.ed-text-h { font-size: 1.25rem; }
+.ed-text-s { font-size: 1rem; }
+.ed-text-b { font-size: .85rem; font-weight: 500; }
+
+.ed-font-list { display: grid; gap: 6px; }
+.ed-font-list button {
+  aspect-ratio: auto;
+  padding: 9px 10px;
+  text-align: start;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+}
+.ed-font-list button:hover { border-color: var(--primary); }
+
+.ed-upload-drop {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 18px 12px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+}
+.ed-upload-drop:hover { border-color: var(--primary); color: var(--primary); }
+.ed-upload-drop span { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text); }
+.ed-upload-drop small { font-size: .72rem; }
+.ed-upload-drop.drag { border-color: var(--primary); background: var(--primary-soft); }
+
+.ed-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.ed-upload-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.ed-upload-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ed-upload-thumb:hover { border-color: var(--primary); }
+.ed-upload-thumb.ed-loading { opacity: .5; pointer-events: none; }
+.ed-canvas-pick { margin-top: 10px; }
+.ed-canvas-pick .ed-glabel { margin-top: 0; }
+
+.ed-custom-fonts { display: grid; gap: 4px; margin-top: 8px; }
+.ed-custom-font-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px 8px; font-size: .85rem; background: var(--surface);
+}
+.ed-custom-font-row button {
+  border: none; background: transparent; color: var(--muted); font-size: .75rem;
+  width: 20px; height: 20px; border-radius: 50%; flex: none;
+}
+.ed-custom-font-row button:hover { background: var(--surface-2); color: var(--danger); }
+.ed-upload-del {
+  position: absolute; inset-block-start: 3px; inset-inline-end: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; border: none;
+  font-size: 12px; line-height: 1; display: none;
+}
+.ed-upload-thumb:hover .ed-upload-del { display: block; }
+.ed-upload-usebg {
+  position: absolute; inset-block-start: 3px; inset-inline-start: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; border: none;
+  font-size: 11px; line-height: 1; display: none;
+}
+.ed-upload-thumb:hover .ed-upload-usebg { display: block; }
+
+.ed-swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; }
+.ed-swatches button { aspect-ratio: 1/1; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); }
+/* recently-used quick-pick rows (props panel) — smaller/denser than the
+   Brand Kit's own swatch grid, since this is a secondary convenience, not
+   the primary color-management surface */
+.ed-swatches-sm { grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 2px 0 8px; }
+.ed-swatches-sm button { border-radius: 4px; }
+.ed-recent-fonts { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 8px; }
+.ed-recent-fonts button {
+  border: 1px solid var(--border-strong); background: var(--surface);
+  border-radius: 999px; padding: 3px 10px; font-size: .76rem; color: var(--text);
+}
+.ed-recent-fonts button:hover { border-color: var(--primary); background: var(--primary-soft); }
+
+.ed-brand-sw {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,.14);
+}
+.ed-brand-x {
+  position: absolute; inset-block-start: -6px; inset-inline-end: -6px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #1b1830; color: #fff; font-size: 10px; line-height: 16px;
+  display: none;
+}
+.ed-brand-sw:hover .ed-brand-x { display: block; }
+.ed-brand-logo-preview { margin-top: 10px; display: grid; gap: 8px; }
+.ed-brand-logo-preview[hidden] { display: none; }
+.ed-brand-logo-preview img {
+  max-height: 90px; object-fit: contain;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px;
+}
+
+/* ---- workspace ---------------------------------------------------------- */
+.ed-workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.ed-canvas-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-conic-gradient(#eceaf3 0% 25%, #f4f2f9 0% 50%) 50% / 22px 22px;
+}
+/* Fabric wraps <canvas> in .canvas-container — pin it to fill the canvas area
+   so pointer coordinates stay in sync (no scroll offset, no centering pad). */
+.ed-canvas-area .canvas-container {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+.ed-canvas-area .canvas-container canvas { touch-action: none; }
+.ed-workspace.panning { cursor: grab; }
+.ed-workspace.panning.active { cursor: grabbing; }
+.ed-workspace.lassoing { cursor: crosshair; }
+
+/* ---- page strip ---------------------------------------------------------- */
+.ed-page-strip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  overflow-x: auto;
+}
+.ed-page-strip-list { display: flex; align-items: center; gap: 10px; }
+.ed-page-tile {
+  position: relative; flex: 0 0 auto;
+  width: 74px; height: 74px;
+  border: 2px solid transparent; border-radius: 8px;
+  overflow: hidden; cursor: pointer;
+  background: var(--surface-2);
+  display: grid; place-items: center;
+}
+.ed-page-tile img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.ed-page-tile.active { border-color: var(--primary); }
+.ed-page-tile.dragover { outline: 2px solid var(--primary); }
+.ed-page-tile.dragging { opacity: .4; }
+.ed-page-num {
+  position: absolute; inset-inline-start: 4px; inset-block-start: 2px;
+  font-size: .65rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+.ed-page-del {
+  position: absolute; inset-inline-end: 2px; inset-block-end: 2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; border: none; font-size: 11px; line-height: 1;
+  display: none; padding: 0; cursor: pointer;
+}
+.ed-page-tile:hover .ed-page-del { display: grid; place-items: center; }
+.ed-page-add {
+  flex: 0 0 auto; width: 74px; height: 74px;
+  border: 1.5px dashed var(--border-strong); border-radius: 8px;
+  display: grid; place-items: center; font-size: 1.4rem; color: var(--muted);
+  background: transparent; cursor: pointer;
+}
+.ed-page-add:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ---- right / props --------------------------------------------------------- */
+.ed-right { border-inline-start: 1px solid var(--border); background: var(--panel); overflow-y: auto; padding: 14px; }
+.ed-props-empty { display: grid; place-items: center; height: 100%; text-align: center; padding: 20px; }
+.ed-props-empty[hidden] { display: none; }
+.ed-prop-group { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 14px; }
+.ed-prop-group:last-child { border-bottom: none; }
+
+.ed-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.ed-row > span { font-size: .78rem; font-weight: 600; color: var(--muted); flex: none; }
+.ed-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.ed-row2 label { display: grid; gap: 3px; }
+.ed-row2 label > span { font-size: .72rem; font-weight: 600; color: var(--muted); }
+
+.ed-right input[type="number"], .ed-right select {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: .82rem;
+  background: var(--surface);
+}
+.ed-right input[type="color"] {
+  width: 100%; height: 30px; padding: 2px;
+  border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface);
+}
+.ed-row input[type="range"] { flex: 1; }
+.ed-row output { font-size: .75rem; color: var(--muted); min-width: 28px; text-align: end; }
+
+.ed-btnrow { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ed-btnrow button {
+  min-width: 30px; height: 30px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  border-radius: 6px;
+  font-size: .85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 6px;
+}
+.ed-btnrow button:hover { border-color: var(--primary); background: var(--primary-soft); }
+.ed-btnrow button.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.ed-actions-row { margin-top: 12px; }
+.ed-wbtn { flex: 1; font-weight: 700; }
+.ed-danger { color: var(--danger); }
+.ed-danger:hover { background: #fdecec !important; border-color: var(--danger) !important; }
+
+.ed-decompose-results { display: grid; gap: 10px; margin-top: 6px; }
+.ed-decompose-row {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  background: var(--surface);
+  transition: opacity .12s ease;
+}
+.ed-decompose-row.done { opacity: .45; }
+.ed-decompose-thumb {
+  width: 56px; height: 56px; object-fit: contain; border-radius: 6px;
+  background: repeating-conic-gradient(#eceaf3 0% 25%, #f4f2f9 0% 50%) 50% / 12px 12px;
+  border: 1px solid var(--border);
+}
+.ed-decompose-info { display: grid; gap: 6px; min-width: 0; }
+.ed-decompose-label { font-weight: 700; font-size: .82rem; }
+.ed-decompose-sublabel { font-size: .7rem; color: var(--muted); font-weight: 600; }
+.ed-decompose-info .ed-actions-row { margin-top: 0; }
+.ed-decompose-erase { color: var(--danger); }
+.ed-decompose-erase:hover { background: #fdecec; border-color: var(--danger); }
+.ed-decompose-rowerr { padding: 0; margin: 0; font-size: .75rem; color: var(--danger); }
+.ed-decompose-donebadge { font-size: .72rem; font-weight: 700; color: var(--primary); }
+
+/* ---- onboarding welcome modal --------------------------------------------- */
+.ed-onboard-backdrop {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(20, 16, 50, .45);
+  display: grid; place-items: center;
+  padding: 16px;
+}
+.ed-onboard-backdrop[hidden] { display: none; }
+.ed-onboard-modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(20,16,50,.3);
+  text-align: start;
+}
+.ed-onboard-modal h2 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.2rem; }
+.ed-onboard-sub { margin: 0 0 16px; color: var(--muted); font-size: .88rem; }
+.ed-onboard-list { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 12px; }
+.ed-onboard-list li { display: flex; align-items: center; gap: 10px; font-size: .86rem; }
+.ed-onboard-list .ic { width: 20px; height: 20px; flex: none; color: var(--primary); }
+
+/* ---- present mode ----------------------------------------------------------- */
+.ed-present-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: #0b0a14;
+  display: grid; place-items: center;
+  cursor: pointer;
+}
+.ed-present-overlay[hidden] { display: none; }
+.ed-present-canvas { box-shadow: 0 20px 60px rgba(0,0,0,.5); cursor: default; }
+.ed-present-close, .ed-present-nav {
+  position: absolute;
+  border: none; background: rgba(255,255,255,.12); color: #fff;
+  width: 44px; height: 44px; border-radius: 999px;
+  display: grid; place-items: center; font-size: 1.4rem; line-height: 1;
+  backdrop-filter: blur(4px);
+}
+.ed-present-close:hover, .ed-present-nav:hover { background: rgba(255,255,255,.22); }
+.ed-present-close { inset-block-start: 18px; inset-inline-end: 18px; }
+.ed-present-prev { inset-inline-start: 18px; inset-block-start: 50%; transform: translateY(-50%); }
+.ed-present-next { inset-inline-end: 18px; inset-block-start: 50%; transform: translateY(-50%); }
+.ed-present-counter {
+  position: absolute; inset-block-end: 18px; inset-inline-start: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,.7); font-size: .8rem; font-weight: 600;
+}
+
+/* ---- magic write (Text tab) -------------------------------------------------- */
+.ed-magicwrite { margin-bottom: 16px; }
+.ed-mw-textarea {
+  width: 100%; resize: vertical; font-size: .82rem;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  padding: 8px; margin-bottom: 8px; background: var(--surface-2);
+}
+.ed-magicwrite select {
+  width: 100%; margin-bottom: 8px;
+  border: 1px solid var(--border-strong); border-radius: 6px; padding: 6px 8px; font-size: .8rem;
+}
+
+/* ---- bulk create modal ----------------------------------------------------- */
+.ed-bulk-modal { max-width: 480px; }
+.ed-bulk-label { display: block; font-size: .8rem; font-weight: 700; margin: 14px 0 6px; }
+.ed-bulk-textarea {
+  width: 100%; resize: vertical; font-family: monospace; font-size: .8rem;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  padding: 8px; background: var(--surface-2);
+}
+.ed-bulk-csv-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.ed-bulk-fields { max-height: 220px; overflow-y: auto; display: grid; gap: 8px; }
+.ed-bulk-field-row { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+.ed-bulk-field-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+.ed-bulk-field-row select { border: 1px solid var(--border-strong); border-radius: 6px; padding: 4px 6px; max-width: 40%; }
+.ed-bulk-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+/* ---- context menu ------------------------------------------------------- */
+.ed-ctxmenu {
+  position: fixed;
+  z-index: 60;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 40px rgba(20,16,50,.18);
+  padding: 5px;
+  min-width: 150px;
+  display: grid;
+  gap: 1px;
+}
+.ed-ctxmenu[hidden] { display: none; }
+.ed-ctxmenu button { text-align: start; border: none; background: transparent; padding: 8px 10px; border-radius: 6px; font-size: .83rem; font-weight: 600; }
+.ed-ctxmenu button:hover { background: var(--primary-soft); }
+
+/* ---- layers panel ----------------------------------------------------------- */
+.ed-layers { display: flex; flex-direction: column; gap: 3px; }
+.ed-layer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  user-select: none;
+}
+.ed-layer-row:hover { background: var(--surface-2); }
+.ed-layer-row.active { border-color: var(--primary); background: var(--primary-soft); }
+.ed-layer-row.dragover { border-top: 2px solid var(--primary); }
+.ed-layer-row.dragging { opacity: .4; }
+.ed-layer-grip { color: var(--muted); display: inline-flex; cursor: grab; }
+.ed-layer-grip .ic { width: 14px; height: 14px; }
+.ed-layer-ic {
+  width: 24px; height: 24px; flex: none;
+  border-radius: 5px; background: var(--surface-2);
+  display: grid; place-items: center; font-size: 12px; overflow: hidden;
+}
+.ed-layer-ic img { width: 100%; height: 100%; object-fit: cover; }
+.ed-layer-name {
+  flex: 1; min-width: 0;
+  font-size: .8rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border: none; background: transparent; color: var(--text); padding: 2px;
+}
+.ed-layer-name[readonly] { cursor: pointer; }
+.ed-layer-name:not([readonly]) { background: var(--surface); border: 1px solid var(--primary); border-radius: 4px; }
+.ed-layer-row button.ed-layer-tgl {
+  width: 24px; height: 24px; flex: none;
+  border: none; background: transparent; border-radius: 5px;
+  color: var(--muted); display: inline-flex; align-items: center; justify-content: center;
+}
+.ed-layer-row button.ed-layer-tgl:hover { background: var(--surface); color: var(--text); }
+.ed-layer-row button.ed-layer-tgl .ic { width: 15px; height: 15px; }
+.ed-layer-row.is-hidden .ed-layer-name,
+.ed-layer-row.is-hidden .ed-layer-ic { opacity: .4; }
+
+/* ---- floating selection toolbar ------------------------------------------- */
+.ed-floatbar {
+  position: fixed;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 8px 30px rgba(20,16,50,.2);
+}
+.ed-floatbar[hidden] { display: none; }
+.ed-floatbar button {
+  width: 30px; height: 30px;
+  border: none; background: transparent; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text);
+}
+.ed-floatbar button:hover { background: var(--surface-2); }
+.ed-floatbar button .ic { width: 16px; height: 16px; }
+.ed-floatbar input[type="color"] {
+  width: 26px; height: 26px; padding: 0; border: 1px solid var(--border-strong);
+  border-radius: 50%; overflow: hidden;
+}
+.ed-floatbar .ed-danger:hover { background: #fdecec; }
+/* "more" only makes sense once the phone breakpoint stops auto-opening the
+   full properties sheet on selection (see @media max-width:640px below) —
+   on desktop/tablet the sheet is always reachable already. */
+#fbMore { display: none; }
+
+/* ---- crop bar --------------------------------------------------------------- */
+.ed-cropbar {
+  position: fixed;
+  z-index: 46;
+  inset-block-start: calc(var(--topbar-h) + 10px);
+  inset-inline: 0;
+  margin-inline: auto;
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 8px 30px rgba(20,16,50,.2);
+  font-size: .82rem;
+  font-weight: 700;
+}
+.ed-cropbar[hidden] { display: none; }
+
+.ed-magicgrabbar { flex-wrap: wrap; justify-content: center; max-width: min(92vw, 560px); }
+.ed-magicgrab-modes { width: 100%; justify-content: center; }
+.ed-magicgrab-brush-row {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 8px; font-size: .78rem; font-weight: 700; margin: 0;
+}
+.ed-magicgrab-brush-row input[type="range"] { flex: 1; max-width: 200px; }
+
+/* ---- text-fx rows -------------------------------------------------------- */
+.ed-fx-row > span { display: inline-flex; align-items: center; gap: 6px; }
+.ed-fx-row input[type="color"] { width: 46px; height: 26px; }
+#grpImage .ed-row > span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---- small screens ---------------------------------------------------------- */
+@media (max-width: 1080px) {
+  :root { --left-w: 236px; --right-w: 232px; }
+}
+.ed-panel-close { display: none; }
+@media (max-width: 860px) {
+  .ed-main { grid-template-columns: var(--tabs-w) 1fr; }
+  .ed-left { grid-template-columns: var(--tabs-w) 0; }
+  /* the panel sits offset by --tabs-w (next to the tab icons), so hiding it needs
+     to travel its own width PLUS that offset — a flat -110% falls short and leaves
+     a sliver visible, which also drags the whole page into overflow on mobile. */
+  .ed-left .ed-panels { position: fixed; inset-block: var(--topbar-h) 0; inset-inline-start: var(--tabs-w); width: var(--left-w); background: var(--panel); border-inline-end: 1px solid var(--border); z-index: 20; transform: translateX(calc(-100% - var(--tabs-w) - 12px)); transition: transform .2s; }
+  [dir="rtl"] .ed-left .ed-panels { transform: translateX(calc(100% + var(--tabs-w) + 12px)); }
+  .ed-left.open .ed-panels { transform: none; }
+  .ed-right { position: fixed; inset-block: var(--topbar-h) 0; inset-inline-end: 0; width: var(--right-w); z-index: 20; transform: translateX(110%); transition: transform .2s; }
+  [dir="rtl"] .ed-right { transform: translateX(-110%); }
+  .ed-right.open { transform: none; }
+
+  /* explicit, clearly-tappable close buttons for the two sliding overlays — a
+     44px target per Apple/Google's minimum comfortable touch-target guidance */
+  .ed-panel-close {
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; inset-block-start: 8px; inset-inline-end: 8px;
+    width: 44px; height: 44px; font-size: 1.1rem; line-height: 1;
+    border: none; background: var(--surface-2); color: var(--muted);
+    border-radius: 50%; z-index: 21;
+  }
+
+  /* the topbar's right cluster (save status, resize, share, download, language)
+     doesn't fit its full desktop width on a phone — trim it down to icons only */
+  .ed-top-right { gap: 2px; }
+  .ed-save-pill { min-width: 0; font-size: .64rem; }
+  .dl-btn-text { display: none; }
+  #btnDownload { padding: 7px; }
+  .ed-icon-btn { width: 32px; height: 32px; }
+  .ed-top-right > a.lang-switch { display: none; }
+
+  /* free up room for the title by trimming the zoom cluster to just in/out */
+  .ed-title-input { min-width: 40px; max-width: 120px; }
+  #zoomVal, #btnFit { display: none; }
+  .ed-top-center { gap: 0; }
+}
+
+/* ---- phones: a Canva-style bottom tab bar + bottom sheets -----------------
+   On a ~390px phone the 72px tab rail (permanently reserved, even before any
+   panel opens) ate a fifth of the screen width from the canvas for nothing —
+   Canva's mobile editor has no persistent side rail at all, just a full-width
+   canvas with a horizontally-scrollable icon bar fixed to the bottom. This
+   tier rebuilds that: `.ed-tabs` leaves the grid entirely and becomes that
+   fixed bottom bar (its buttons are unchanged — already icon-over-label,
+   which is exactly the Canva bottom-tab look), and both the left panel and
+   the right (properties) panel become full-width sheets that rise from just
+   above it instead of a same-height side overlay. */
+@media (max-width: 640px) {
+  .ed-main { grid-template-columns: 1fr; }
+  /* .ed-left itself stays position:static (only its children go fixed below)
+     — with .ed-main now down to a single explicit column it would otherwise
+     still claim a full grid row of its own and push .ed-workspace into a
+     second (empty-height) row. display:contents removes its own box from
+     the grid entirely — its position:fixed children are excluded from grid
+     placement on their own merit, so .ed-workspace ends up the sole grid
+     item and correctly fills the column. (Not position:fixed itself: that
+     would make .ed-left a containing block for those fixed children,
+     breaking their inset-relative-to-viewport math.) */
+  .ed-left { display: contents; }
+  .ed-tabs {
+    position: fixed;
+    z-index: 25;
+    inset-inline: 0;
+    inset-block-end: 0;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: calc(var(--bottombar-h) + env(safe-area-inset-bottom));
+    padding: 4px 4px env(safe-area-inset-bottom);
+    gap: 2px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    border-inline-end: none;
+    border-block-start: 1px solid var(--border);
+    transition: transform .15s;
+  }
+  .ed-tab { flex: 0 0 auto; min-width: 60px; }
+  .ed-workspace { padding-block-end: calc(var(--bottombar-h) + env(safe-area-inset-bottom)); }
+  /* editing text opens the keyboard — the tab bar would just sit uselessly
+     between the canvas and the keyboard, or get covered by it; core.js
+     toggles this class on text:editing:entered/exited. */
+  .ed-tabs.ed-typing { transform: translateY(100%); }
+
+  .ed-left .ed-panels, .ed-right {
+    inset-inline: 0;
+    inset-block: auto calc(var(--bottombar-h) + env(safe-area-inset-bottom));
+    width: 100%;
+    max-height: 55vh;
+    border-start-start-radius: 16px;
+    border-start-end-radius: 16px;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .16);
+    transform: translateY(100%);
+  }
+  .ed-left.open .ed-panels { transform: none; }
+  /* unlike the tablet tier above, selecting something no longer auto-opens
+     this as a half-screen sheet (props.js still adds .open on every
+     selection) — it now also needs .user-opened, added only by the
+     floatbar's explicit "…" button (io.js #fbMore), Canva-style. */
+  .ed-right.open { transform: translateY(100%); }
+  .ed-right.open.user-opened { transform: none; }
+  [dir="rtl"] .ed-left .ed-panels, [dir="rtl"] .ed-right { transform: translateY(100%); }
+
+  /* the floating selection toolbar becomes a fixed bar pinned above the tab
+     bar instead of tracking the selection's screen position — on a small,
+     often-scrolled/zoomed canvas, a position computed from the object's
+     current on-screen rect (positionFloatbar() in io.js) is fragile, and a
+     fixed docked bar is the more Canva-like, always-reachable affordance
+     anyway. `!important` beats io.js's inline left/top. */
+  .ed-floatbar {
+    position: fixed !important;
+    /* plain physical left+transform, not inset-inline-start: centering is
+       symmetric and direction-agnostic, but "50% from the logical start edge"
+       is NOT — it'd sit off-center (mirrored) in RTL. */
+    left: 50% !important;
+    top: auto !important;
+    transform: translateX(-50%);
+    /* + --kb-inset (0px, unless core.js's visualViewport listener says the
+       on-screen keyboard is open) rides the toolbar up above the keyboard
+       instead of leaving it pinned to the physical screen edge, behind it */
+    bottom: calc(var(--bottombar-h) + 10px + env(safe-area-inset-bottom) + var(--kb-inset)) !important;
+    width: max-content;
+    max-width: calc(100% - 16px);
+    overflow-x: auto;
+  }
+  .ed-floatbar button { width: 40px; height: 40px; }
+  .ed-floatbar input[type="color"] { width: 34px; height: 34px; }
+  #fbMore { display: inline-flex; }
+
+  /* both sheets cover the same bottom region the floatbar is pinned to */
+  body:has(.ed-left.open) .ed-floatbar,
+  body:has(.ed-right.open.user-opened) .ed-floatbar { display: none; }
+}

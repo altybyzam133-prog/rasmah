@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= dir %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title><%= pageTitle %> — <%= brandName %></title>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+  <style>
+    body { background: #f0eef8; }
+    .viewer-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px; background: #fff; border-bottom: 1px solid var(--border);
+    }
+    .viewer-stage {
+      display: grid; place-items: center;
+      padding: 40px 20px;
+      min-height: calc(100vh - 58px - 60px);
+    }
+    #vc { box-shadow: 0 10px 40px rgba(20,16,50,.18); background: #fff; max-width: 100%; }
+    .viewer-foot { text-align: center; padding: 16px; }
+    .viewer-pager { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 4px 10px 20px; }
+    .viewer-pager[hidden] { display: none; }
+    .viewer-pager button {
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+      background: #fff; font-size: 1.1rem; cursor: pointer;
+    }
+    .viewer-pager button:disabled { opacity: .35; cursor: default; }
+    .viewer-pager span { font-size: .85rem; color: var(--muted); min-width: 90px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="viewer-top">
+    <span class="brand small"><img class="brand-logo" src="/static/img/favicon.svg" alt=""> <%= brandName %></span>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" id="vPng">PNG</button>
+      <button class="btn btn-primary btn-sm" id="vPdf">PDF</button>
+    </div>
+  </div>
+  <div class="viewer-stage"><canvas id="vc"></canvas></div>
+  <div class="viewer-pager" id="viewerPager" hidden>
+    <button type="button" id="vPrev" aria-label="<%= t('ed_view_page_prev') %>">‹</button>
+    <span id="vPageInfo"></span>
+    <button type="button" id="vNext" aria-label="<%= t('ed_view_page_next') %>">›</button>
+  </div>
+  <div class="viewer-foot muted small">
+    <a class="link" href="/">صُمّم بـ <%= brandName %> · Made with <%= brandName %></a>
+  </div>
+
+  <script id="vData" type="application/json"><%- JSON.stringify({
+    w: design.width, h: design.height, data: design.data_json || '', title: design.title || 'design',
+    i18n: { pageOf: t('ed_view_page_of') }
+  }).replace(/</g, '\\u003c') %></script>
+  <script src="<%= vendorLocal.fabric ? '/static/vendor/fabric.min.js' : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js' %>"></script>
+  <script src="<%= vendorLocal.jspdf ? '/static/vendor/jspdf.umd.min.js' : 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js' %>"></script>
+  <script src="/static/js/viewer.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= dir %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title><%= pageTitle %> — <%= brandName %></title>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/css/editor.css">
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+</head>
+<body class="editor-body" dir="<%= dir %>">
+
+<%
+  const ICON = {
+    back: '<path d="M15 18l-6-6 6-6"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a6 6 0 0 1 0 12h-3"/>',
+    redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H9a6 6 0 0 0 0 12h3"/>',
+    zin: '<circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M21 21l-4.3-4.3"/>',
+    zout: '<circle cx="11" cy="11" r="7"/><path d="M8 11h6M21 21l-4.3-4.3"/>',
+    fit: '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/>',
+    download: '<path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/>',
+    tpl: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    shapes: '<circle cx="8" cy="8" r="5"/><path d="M14 12h7v7h-7z"/>',
+    text: '<path d="M4 7V5h16v2M9 19h6M12 5v14"/>',
+    upload: '<path d="M12 15V3m0 0 4 4m-4-4L8 7M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+    bg: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/><circle cx="9" cy="9" r="1.5"/>',
+    layers: '<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/>',
+    eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    eyeoff: '<path d="M9.9 4.2A9.5 9.5 0 0 1 12 4c6.5 0 10 8 10 8a18 18 0 0 1-2.3 3.3M6.7 6.7A18 18 0 0 0 2 12s3.5 8 10 8a9.5 9.5 0 0 0 4.2-1M3 3l18 18"/>',
+    lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    unlock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/>',
+    grip: '<circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/>',
+    badge: '<path d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17l-5.9 3 1.2-6.5L2.5 8.9 9 8z"/>',
+    copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+    trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',
+    up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+    down: '<path d="M12 5v14M19 12l-7 7-7-7"/>'
+  };
+  function icon(name, cls) {
+    return '<svg class="ic ' + (cls||'') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICON[name] + '</svg>';
+  }
+%>
+
+<header class="ed-topbar">
+  <div class="ed-top-left">
+    <a class="ed-icon-btn" href="/dashboard" title="<%= t('ed_back') %>" aria-label="<%= t('ed_back') %>"><%- icon('back') %></a>
+    <img class="ed-brand-logo" src="/static/img/favicon.svg" alt="">
+    <input type="text" id="edTitle" class="ed-title-input" value="<%= design.title %>"
+           placeholder="<%= t('ed_untitled') %>" maxlength="120" aria-label="title">
+  </div>
+
+  <div class="ed-top-center">
+    <button class="ed-icon-btn" id="btnUndo" title="<%= t('ed_undo') %>" disabled><%- icon('undo') %></button>
+    <button class="ed-icon-btn" id="btnRedo" title="<%= t('ed_redo') %>" disabled><%- icon('redo') %></button>
+    <span class="ed-sep"></span>
+    <button class="ed-icon-btn" id="btnZoomOut" title="<%= t('ed_zoom_out') %>"><%- icon('zout') %></button>
+    <button class="ed-zoom-val" id="zoomVal">100%</button>
+    <button class="ed-icon-btn" id="btnZoomIn" title="<%= t('ed_zoom_in') %>"><%- icon('zin') %></button>
+    <button class="ed-icon-btn" id="btnFit" title="<%= t('ed_zoom_fit') %>"><%- icon('fit') %></button>
+  </div>
+
+  <div class="ed-top-right">
+    <span class="ed-save-pill" id="savePill" data-t-saved="<%= t('ed_saved') %>" data-t-saving="<%= t('ed_saving') %>"
+          data-t-unsaved="<%= t('ed_unsaved') %>" data-t-error="<%= t('ed_save_error') %>"><%= t('ed_saved') %></span>
+    <div class="ed-dropdown" id="resizeDropdown">
+      <button class="ed-icon-btn" id="btnResize" title="<%= t('ed_resize') %>" aria-label="<%= t('ed_resize') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m0 8v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3m0-8V5a2 2 0 0 0-2-2h-3"/><path d="M9 15 15 9"/></svg>
+      </button>
+      <div class="ed-dropdown-menu ed-resize-menu" hidden>
+        <p class="ed-share-desc"><%= t('ed_resize_desc') %></p>
+        <div class="ed-resize-groups" id="resizeGroups"></div>
+        <div class="ed-resize-custom">
+          <label><span><%= t('ed_resize_w') %></span><input type="number" id="resizeW" min="16" max="8000" step="1"></label>
+          <label><span><%= t('ed_resize_h') %></span><input type="number" id="resizeH" min="16" max="8000" step="1"></label>
+        </div>
+        <button class="btn btn-primary btn-sm ed-block" id="resizeApply"><%= t('ed_resize_apply') %></button>
+      </div>
+    </div>
+    <button class="ed-icon-btn" id="btnBulk" title="<%= t('ed_bulk') %>" aria-label="<%= t('ed_bulk') %>">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M10 6.5h4M6.5 10v4M17.5 10v4M10 17.5h4"/></svg>
+    </button>
+    <div class="ed-dropdown" id="saveTplDropdown">
+      <button class="ed-icon-btn" id="btnSaveTpl" title="<%= t('ed_save_tpl') %>" aria-label="<%= t('ed_save_tpl') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      </button>
+      <div class="ed-dropdown-menu ed-savetpl-menu" hidden>
+        <p class="ed-share-desc"><%= t('ed_save_tpl_desc') %></p>
+        <label class="ed-savetpl-field"><span><%= t('ed_save_tpl_name') %></span>
+          <input type="text" id="saveTplName" maxlength="120">
+        </label>
+        <button class="btn btn-primary btn-sm ed-block" id="saveTplApply"><%= t('ed_save_tpl_btn') %></button>
+        <p class="ed-hint" id="saveTplHint"></p>
+      </div>
+    </div>
+    <div class="ed-dropdown" id="shareDropdown">
+      <button class="ed-icon-btn" id="btnShare" title="<%= t('ed_share') %>" aria-label="<%= t('ed_share') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      </button>
+      <div class="ed-dropdown-menu ed-share-menu" hidden>
+        <p class="ed-share-desc"><%= t('ed_share_desc') %></p>
+        <div class="ed-share-row">
+          <input type="text" id="shareUrl" readonly placeholder="—">
+          <button class="btn btn-primary btn-sm" id="shareCopy"><%= t('ed_share_copy') %></button>
+        </div>
+        <button class="btn btn-ghost btn-sm ed-block" id="shareCreate"><%= t('ed_share_create') %></button>
+        <button class="ed-share-disable" id="shareDisable" hidden><%= t('ed_share_disable') %></button>
+      </div>
+    </div>
+    <div class="ed-dropdown" id="historyDropdown">
+      <button class="ed-icon-btn" id="btnHistory" title="<%= t('ed_history') %>" aria-label="<%= t('ed_history') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/><path d="M3.5 9.5A9 9 0 1 1 3 12"/><path d="M3 5v4h4"/></svg>
+      </button>
+      <div class="ed-dropdown-menu ed-history-menu" hidden>
+        <p class="ed-share-desc"><%= t('ed_history_desc') %></p>
+        <div id="historyList" class="ed-history-list"></div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="btnPresent">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      <span><%= t('ed_present') %></span>
+    </button>
+    <div class="ed-dropdown" id="dlDropdown">
+      <button class="btn btn-primary btn-sm" id="btnDownload"><%- icon('download') %> <span class="dl-btn-text"><%= t('ed_download') %></span></button>
+      <div class="ed-dropdown-menu" hidden>
+        <button data-fmt="png"><%= t('ed_download_png') %></button>
+        <button data-fmt="jpg"><%= t('ed_download_jpg') %></button>
+        <button data-fmt="pdf"><%= t('ed_download_pdf') %></button>
+        <button data-fmt="svg"><%= t('ed_download_svg') %></button>
+        <button data-fmt="gif" id="dlGifBtn"<%= vendorLocal.gif ? '' : ' disabled title="' + t('ed_download_gif_unavailable') + '"' %>><%= t('ed_download_gif') %></button>
+        <label class="ed-dd-check"><input type="checkbox" id="dlTransparent"> <%= t('ed_download_transparent') %></label>
+        <label class="ed-dd-row"><%= t('ed_download_scale') %>
+          <select id="dlScale"><option value="1">×1</option><option value="2" selected>×2</option><option value="3">×3</option></select>
+        </label>
+        <label class="ed-dd-check" id="dlAllPagesRow" hidden><input type="checkbox" id="dlAllPages"> <%= t('ed_download_all_pages') %></label>
+        <p class="ed-hint" id="dlGifHint" hidden><%= t('ed_download_gif_pages_hint') %></p>
+      </div>
+    </div>
+    <div class="ed-dropdown" id="shortcutsDropdown">
+      <button class="ed-icon-btn" id="btnShortcuts" title="<%= t('ed_shortcuts') %>" aria-label="<%= t('ed_shortcuts') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
+      </button>
+      <div class="ed-dropdown-menu ed-shortcuts-menu" hidden>
+        <p class="ed-share-desc"><%= t('ed_shortcuts_desc') %></p>
+        <div class="ed-shortcut-list">
+          <% [
+            ['Ctrl/⌘ + S', 'ed_sc_save'], ['Ctrl/⌘ + Z', 'ed_sc_undo'], ['Ctrl/⌘ + Shift + Z', 'ed_sc_redo'],
+            ['Ctrl/⌘ + D', 'ed_sc_duplicate'], ['Alt + ' + t('ed_sc_drag'), 'ed_sc_duplicate_drag'],
+            ['Ctrl/⌘ + C', 'ed_sc_copy'], ['Ctrl/⌘ + V', 'ed_sc_paste'], ['Ctrl/⌘ + A', 'ed_sc_select_all'],
+            ['Ctrl/⌘ + G', 'ed_sc_group'], ['Ctrl/⌘ + Shift + G', 'ed_sc_ungroup'],
+            ['Delete', 'ed_sc_delete'], ['Escape', 'ed_sc_deselect'],
+            [t('ed_sc_arrows'), 'ed_sc_nudge'], ['Shift + ' + t('ed_sc_arrows'), 'ed_sc_nudge_big'],
+            ['+ / -', 'ed_sc_zoom'], ['0', 'ed_sc_zoom_reset'], ['F', 'ed_sc_zoom_fit'],
+            ['Ctrl/⌘ + ' + t('ed_sc_scroll'), 'ed_sc_zoom_scroll'], [t('ed_sc_space_drag'), 'ed_sc_pan'],
+            [t('ed_sc_right_click'), 'ed_sc_context_menu'], ['Shift + ' + t('ed_sc_rotate'), 'ed_sc_rotate_snap'],
+          ].forEach(function(row) { %>
+            <div class="ed-shortcut-row"><kbd><%= row[0] %></kbd><span><%= t(row[1]) %></span></div>
+          <% }); %>
+        </div>
+        <button class="btn btn-ghost btn-sm ed-block" id="onboardReplay"><%= t('ed_onboard_replay') %></button>
+      </div>
+    </div>
+    <a class="lang-switch" href="<%= switchLangUrl %>"><%= t('switch_to') %></a>
+  </div>
+</header>
+
+<div class="ed-main">
+  <!-- LEFT -->
+  <aside class="ed-left">
+    <nav class="ed-tabs" role="tablist">
+      <button class="ed-tab active" data-tab="templates" title="<%= t('ed_tab_templates') %>"><%- icon('tpl') %><span><%= t('ed_tab_templates') %></span></button>
+      <button class="ed-tab" data-tab="elements" title="<%= t('ed_tab_elements') %>"><%- icon('shapes') %><span><%= t('ed_tab_elements') %></span></button>
+      <button class="ed-tab" data-tab="text" title="<%= t('ed_tab_text') %>"><%- icon('text') %><span><%= t('ed_tab_text') %></span></button>
+      <button class="ed-tab" data-tab="uploads" title="<%= t('ed_tab_uploads') %>"><%- icon('upload') %><span><%= t('ed_tab_uploads') %></span></button>
+      <button class="ed-tab" data-tab="stock" title="<%= t('ed_tab_stock') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+        <span><%= t('ed_tab_stock') %></span>
+      </button>
+      <button class="ed-tab" data-tab="removebg" title="<%= t('ed_tab_removebg') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>
+        <span><%= t('ed_tab_removebg') %></span>
+      </button>
+      <button class="ed-tab" data-tab="decompose" title="<%= t('ed_tab_decompose') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M14 5h4a2 2 0 0 1 2 2v4M10 19H6a2 2 0 0 1-2-2v-4"/></svg>
+        <span><%= t('ed_tab_decompose') %></span>
+      </button>
+      <button class="ed-tab" data-tab="ai" title="<%= t('ed_tab_ai') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+        <span><%= t('ed_tab_ai') %></span>
+      </button>
+      <button class="ed-tab" data-tab="draw" title="<%= t('ed_tab_draw') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span><%= t('ed_tab_draw') %></span>
+      </button>
+      <button class="ed-tab" data-tab="charts" title="<%= t('ed_tab_charts') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+        <span><%= t('ed_tab_charts') %></span>
+      </button>
+      <button class="ed-tab" data-tab="table" title="<%= t('ed_tab_table') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        <span><%= t('ed_tab_table') %></span>
+      </button>
+      <button class="ed-tab" data-tab="qr" title="<%= t('ed_tab_qr') %>">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v.01"/></svg>
+        <span><%= t('ed_tab_qr') %></span>
+      </button>
+      <button class="ed-tab" data-tab="background" title="<%= t('ed_tab_background') %>"><%- icon('bg') %><span><%= t('ed_tab_background') %></span></button>
+      <button class="ed-tab" data-tab="layers" title="<%= t('ed_tab_layers') %>"><%- icon('layers') %><span><%= t('ed_tab_layers') %></span></button>
+      <button class="ed-tab" data-tab="brand" title="<%= t('ed_tab_brand') %>"><%- icon('badge') %><span><%= t('ed_tab_brand') %></span></button>
+    </nav>
+
+    <div class="ed-panels">
+      <button type="button" class="ed-panel-close" id="closeLeftPanel" aria-label="<%= t('common_close') %>">✕</button>
+      <!-- templates -->
+      <section class="ed-panel active" data-panel="templates">
+        <h3><%= t('ed_tab_templates') %></h3>
+        <input type="search" class="ed-search" id="tplSearch" placeholder="<%= t('ed_tpl_search') %>">
+        <div class="ed-el-filters" id="tplFilters"></div>
+        <div class="ed-tpl-list" id="tplList"><p class="ed-hint"><%= t('common_loading') %></p></div>
+      </section>
+
+      <!-- elements -->
+      <section class="ed-panel" data-panel="elements">
+        <h3><%= t('ed_shapes') %></h3>
+        <div class="ed-shape-grid">
+          <button data-shape="rect" title="<%= t('ed_shape_rect') %>"><span class="sh sh-rect"></span></button>
+          <button data-shape="rounded" title="<%= t('ed_shape_rounded') %>"><span class="sh sh-rounded"></span></button>
+          <button data-shape="circle" title="<%= t('ed_shape_circle') %>"><span class="sh sh-circle"></span></button>
+          <button data-shape="ellipse" title="<%= t('ed_shape_ellipse') %>"><span class="sh sh-ellipse"></span></button>
+          <button data-shape="triangle" title="<%= t('ed_shape_triangle') %>"><span class="sh sh-triangle"></span></button>
+          <button data-shape="line" title="<%= t('ed_shape_line') %>"><span class="sh sh-line"></span></button>
+          <button data-shape="arrow" title="<%= t('ed_shape_arrow') %>"><span class="sh sh-arrow">→</span></button>
+          <button data-shape="star" title="<%= t('ed_shape_star') %>"><span class="sh sh-star">★</span></button>
+        </div>
+
+        <h3><%= t('ed_frames') %></h3>
+        <p class="ed-hint"><%= t('ed_frames_hint') %></p>
+        <div class="ed-shape-grid">
+          <button data-frame="rect" title="<%= t('ed_shape_rect') %>"><span class="sh sh-rect"></span></button>
+          <button data-frame="rounded" title="<%= t('ed_shape_rounded') %>"><span class="sh sh-rounded"></span></button>
+          <button data-frame="circle" title="<%= t('ed_shape_circle') %>"><span class="sh sh-circle"></span></button>
+          <button data-frame="star" title="<%= t('ed_shape_star') %>"><span class="sh sh-star">★</span></button>
+        </div>
+
+        <h3><%= t('ed_grids') %></h3>
+        <p class="ed-hint"><%= t('ed_grids_hint') %></p>
+        <div class="ed-shape-grid">
+          <button data-grid="2col" title="<%= t('ed_grid_2col') %>">
+            <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="3" width="9" height="18"/><rect x="13" y="3" width="9" height="18"/></svg>
+          </button>
+          <button data-grid="2row" title="<%= t('ed_grid_2row') %>">
+            <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="2" width="18" height="9"/><rect x="3" y="13" width="18" height="9"/></svg>
+          </button>
+          <button data-grid="grid4" title="<%= t('ed_grid_4') %>">
+            <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg>
+          </button>
+          <button data-grid="big2" title="<%= t('ed_grid_big2') %>">
+            <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="13" height="20"/><rect x="17" y="2" width="5" height="9"/><rect x="17" y="13" width="5" height="9"/></svg>
+          </button>
+        </div>
+
+        <h3><%= t('ed_el_lib') %></h3>
+        <input type="search" class="ed-search" id="elSearch" placeholder="<%= t('ed_el_search') %>">
+        <div class="ed-el-filters" id="elFilters"></div>
+        <div class="ed-el-grid" id="elGrid"><p class="ed-hint"><%= t('common_loading') %></p></div>
+      </section>
+
+      <!-- text -->
+      <section class="ed-panel" data-panel="text">
+        <h3><%= t('ed_tab_text') %></h3>
+        <div class="ed-text-add">
+          <button data-text="heading" class="ed-text-btn ed-text-h"><%= t('ed_add_heading') %></button>
+          <button data-text="subheading" class="ed-text-btn ed-text-s"><%= t('ed_add_subheading') %></button>
+          <button data-text="body" class="ed-text-btn ed-text-b"><%= t('ed_add_body') %></button>
+        </div>
+        <h3><%= t('ed_magicwrite') %></h3>
+        <div class="ed-magicwrite">
+          <textarea id="mwPrompt" class="ed-mw-textarea" rows="2" placeholder="<%= t('ed_magicwrite_placeholder') %>"></textarea>
+          <select id="mwTone">
+            <option value="general" selected><%= t('ed_magicwrite_general') %></option>
+            <option value="headline"><%= t('ed_magicwrite_headline') %></option>
+            <option value="tagline"><%= t('ed_magicwrite_tagline') %></option>
+            <option value="description"><%= t('ed_magicwrite_description') %></option>
+          </select>
+          <button class="btn btn-primary btn-sm ed-block" id="mwGenerate"><%= t('ed_magicwrite_generate') %></button>
+          <p class="ed-hint" id="mwHint"></p>
+        </div>
+        <h3><%= t('ed_props_font') %></h3>
+        <div class="ed-font-list" id="fontList"></div>
+      </section>
+
+      <!-- uploads -->
+      <section class="ed-panel" data-panel="uploads">
+        <h3><%= t('ed_tab_uploads') %></h3>
+        <label class="ed-upload-drop" id="uploadDrop">
+          <input type="file" id="uploadInput" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" multiple hidden>
+          <span><%- icon('upload') %> <%= t('ed_upload_btn') %></span>
+          <small><%= t('ed_upload_hint', { mb: config.maxUploadMb }) %></small>
+        </label>
+        <input type="search" class="ed-search" id="uploadSearch" placeholder="<%= t('ed_upload_search') %>" hidden>
+        <div class="ed-upload-grid" id="uploadGrid"><p class="ed-hint"><%= t('ed_uploads_empty') %></p></div>
+      </section>
+
+      <!-- stock photos (Pexels) -->
+      <section class="ed-panel" data-panel="stock">
+        <h3><%= t('ed_tab_stock') %></h3>
+        <% if (config.pexelsApiKey) { %>
+          <input type="search" class="ed-search" id="stockSearch" placeholder="<%= t('ed_stock_search') %>">
+          <div class="ed-upload-grid" id="stockGrid"><p class="ed-hint"><%= t('ed_stock_hint') %></p></div>
+          <button class="btn btn-ghost btn-sm ed-block" id="stockMoreBtn" hidden><%= t('ed_stock_more') %></button>
+        <% } else { %>
+          <p class="ed-hint"><%= t('ed_stock_unavailable') %></p>
+        <% } %>
+      </section>
+
+      <!-- remove background (standalone: upload a photo, cut it out) -->
+      <section class="ed-panel" data-panel="removebg">
+        <h3><%= t('ed_tab_removebg') %></h3>
+        <label class="ed-upload-drop" id="removeBgTabDrop">
+          <input type="file" id="removeBgTabInput" accept="image/png,image/jpeg,image/webp" hidden>
+          <span><%- icon('upload') %> <%= t('ed_upload_btn') %></span>
+          <small><%= t('ed_upload_hint', { mb: config.maxUploadMb }) %></small>
+        </label>
+        <div class="ed-canvas-pick" id="removeBgTabCanvasPick" hidden>
+          <span class="ed-glabel"><%= t('ed_pick_from_canvas') %></span>
+          <div class="ed-upload-grid" id="removeBgTabCanvasGrid"></div>
+        </div>
+        <div id="removeBgTabPreview" class="ed-removebg-preview" hidden>
+          <img id="removeBgTabImg" src="" alt="">
+          <div class="ed-btnrow ed-actions-row" id="removeBgTabOpts">
+            <button class="ed-wbtn" data-mode="transparent"><%= t('ed_img_removebg_transparent') %></button>
+            <button class="ed-wbtn" data-mode="white"><%= t('ed_img_removebg_white') %></button>
+          </div>
+          <button class="btn btn-ghost btn-sm ed-block" id="removeBgTabImageBtn" data-mode="image"><%= t('ed_img_removebg_image') %></button>
+          <input type="file" id="removeBgTabImageInput" accept="image/png,image/jpeg,image/webp" hidden>
+        </div>
+        <p class="ed-hint" id="removeBgTabHint"></p>
+      </section>
+
+      <!-- ai generate -->
+      <section class="ed-panel" data-panel="ai">
+        <h3><%= t('ed_ai_generate_title') %></h3>
+        <textarea id="aiPrompt" class="ed-ai-prompt" rows="4" maxlength="600" placeholder="<%= t('ed_ai_prompt_placeholder') %>"></textarea>
+        <button class="btn btn-primary btn-sm ed-block" id="aiGenerateBtn"><%= t('ed_ai_generate_btn') %></button>
+        <p class="ed-hint" id="aiGenerateHint"></p>
+        <div class="ed-upload-grid" id="aiResultGrid"></div>
+      </section>
+
+      <!-- decompose elements (standalone: upload a photo, break it into pieces) -->
+      <section class="ed-panel" data-panel="decompose">
+        <h3><%= t('ed_tab_decompose') %></h3>
+        <label class="ed-upload-drop" id="decomposeTabDrop">
+          <input type="file" id="decomposeTabInput" accept="image/png,image/jpeg,image/webp" hidden>
+          <span><%- icon('upload') %> <%= t('ed_upload_btn') %></span>
+          <small><%= t('ed_upload_hint', { mb: config.maxUploadMb }) %></small>
+        </label>
+        <div class="ed-canvas-pick" id="decomposeTabCanvasPick" hidden>
+          <span class="ed-glabel"><%= t('ed_pick_from_canvas') %></span>
+          <div class="ed-upload-grid" id="decomposeTabCanvasGrid"></div>
+        </div>
+        <div id="decomposeTabPreview" class="ed-removebg-preview" hidden>
+          <img id="decomposeTabImg" src="" alt="">
+          <button class="btn btn-primary btn-sm ed-block" id="decomposeTabRun"><%= t('ed_img_decompose_btn') %></button>
+        </div>
+        <p class="ed-hint" id="decomposeTabHint"></p>
+        <div class="ed-decompose-results" id="decomposeTabResults" hidden></div>
+      </section>
+
+      <!-- freehand draw -->
+      <section class="ed-panel" data-panel="draw">
+        <h3><%= t('ed_tab_draw') %></h3>
+        <label class="ed-row"><span><%= t('ed_props_color') %></span><input type="color" id="drawColor" value="#1b1830"></label>
+        <label class="ed-row"><span><%= t('ed_draw_width') %></span>
+          <input type="range" id="drawWidth" min="1" max="60" step="1" value="6"><output id="drawWidthOut">6</output></label>
+        <p class="ed-hint"><%= t('ed_draw_hint') %></p>
+      </section>
+
+      <!-- charts -->
+      <section class="ed-panel" data-panel="charts">
+        <h3><%= t('ed_tab_charts') %></h3>
+        <div class="ed-btnrow ed-actions-row" id="chartTypeRow">
+          <button data-charttype="bar" class="ed-wbtn on"><%= t('ed_chart_bar') %></button>
+          <button data-charttype="pie" class="ed-wbtn"><%= t('ed_chart_pie') %></button>
+          <button data-charttype="line" class="ed-wbtn"><%= t('ed_chart_line') %></button>
+        </div>
+        <span class="ed-glabel"><%= t('ed_chart_data') %></span>
+        <textarea id="chartData" class="ed-ai-prompt" rows="6">Jan,30
+Feb,45
+Mar,20
+Apr,60</textarea>
+        <p class="ed-hint"><%= t('ed_chart_data_hint') %></p>
+        <button class="btn btn-primary btn-sm ed-block" id="chartInsertBtn"><%= t('ed_chart_insert') %></button>
+      </section>
+
+      <!-- table -->
+      <section class="ed-panel" data-panel="table">
+        <h3><%= t('ed_tab_table') %></h3>
+        <div class="ed-row2">
+          <label><span><%= t('ed_table_rows') %></span><input type="number" id="tableRows" min="1" max="12" value="3"></label>
+          <label><span><%= t('ed_table_cols') %></span><input type="number" id="tableCols" min="1" max="8" value="3"></label>
+        </div>
+        <button class="btn btn-primary btn-sm ed-block" id="tableInsertBtn"><%= t('ed_table_insert') %></button>
+        <p class="ed-hint"><%= t('ed_table_hint') %></p>
+      </section>
+
+      <!-- QR code -->
+      <section class="ed-panel" data-panel="qr">
+        <h3><%= t('ed_tab_qr') %></h3>
+        <textarea id="qrText" class="ed-ai-prompt" rows="3" maxlength="1000" placeholder="<%= t('ed_qr_placeholder') %>"></textarea>
+        <button class="btn btn-primary btn-sm ed-block" id="qrInsertBtn"><%= t('ed_qr_insert') %></button>
+        <p class="ed-hint" id="qrHint"></p>
+      </section>
+
+      <!-- layers -->
+      <section class="ed-panel" data-panel="layers">
+        <h3><%= t('ed_tab_layers') %></h3>
+        <div class="ed-layers" id="layersList"><p class="ed-hint"><%= t('ed_layers_empty') %></p></div>
+      </section>
+
+      <!-- brand kit -->
+      <section class="ed-panel" data-panel="brand">
+        <h3><%= t('ed_brand_colors') %></h3>
+        <div class="ed-swatches" id="brandColors"></div>
+        <button class="btn btn-ghost btn-sm ed-block" id="brandAddColor"><%= t('ed_brand_add_color') %></button>
+        <button class="btn btn-ghost btn-sm ed-block" id="brandExtractBtn"><%= t('ed_brand_extract') %></button>
+        <input type="file" id="brandExtractInput" accept="image/png,image/jpeg,image/webp" hidden>
+        <div class="ed-canvas-pick" id="brandExtractCanvasPick" hidden>
+          <span class="ed-glabel"><%= t('ed_pick_from_canvas') %></span>
+          <div class="ed-upload-grid" id="brandExtractCanvasGrid"></div>
+        </div>
+        <h3><%= t('ed_brand_fonts') %></h3>
+        <label class="ed-row"><span><%= t('ed_brand_font_heading') %></span><select id="brandFontH"></select></label>
+        <label class="ed-row"><span><%= t('ed_brand_font_body') %></span><select id="brandFontB"></select></label>
+        <div class="ed-custom-fonts" id="customFontsList"></div>
+        <label class="ed-upload-drop" id="fontUploadDrop">
+          <input type="file" id="fontUploadInput" accept=".ttf,.otf,.woff,.woff2" hidden>
+          <span><%= t('ed_brand_upload_font') %></span>
+          <small><%= t('ed_brand_font_hint') %></small>
+        </label>
+        <h3><%= t('ed_brand_logo') %></h3>
+        <label class="ed-upload-drop" id="brandLogoDrop">
+          <input type="file" id="brandLogoInput" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+          <span><%= t('ed_upload_btn') %></span>
+        </label>
+        <div id="brandLogoPreview" class="ed-brand-logo-preview" hidden>
+          <img id="brandLogoImg" src="" alt="">
+          <button class="btn btn-primary btn-sm ed-block" id="brandLogoAdd"><%= t('ed_brand_logo_add') %></button>
+        </div>
+
+        <h3><%= t('ed_brand_apply_title') %></h3>
+        <p class="ed-hint"><%= t('ed_brand_apply_desc') %></p>
+        <button class="btn btn-primary btn-sm ed-block" id="brandApplyBtn"><%= t('ed_brand_apply_btn') %></button>
+        <p class="ed-hint" id="brandApplyHint"></p>
+      </section>
+
+      <!-- background -->
+      <section class="ed-panel" data-panel="background">
+        <h3><%= t('ed_bg_color') %></h3>
+        <div class="ed-swatches" id="bgSwatches"></div>
+        <label class="ed-row"><span><%= t('ed_props_color') %></span>
+          <input type="color" id="bgColorPick" value="#ffffff"></label>
+        <button class="btn btn-ghost btn-sm ed-block" id="bgClear"><%= t('ed_bg_clear') %></button>
+        <h3><%= t('ed_bg_image') %></h3>
+        <div class="ed-upload-grid" id="bgImageGrid"><p class="ed-hint"><%= t('ed_uploads_empty') %></p></div>
+
+        <h3><%= t('ed_bg_edit_title') %></h3>
+        <p class="ed-hint"><%= t('ed_bg_edit_desc') %></p>
+        <span class="ed-glabel"><%= t('ed_img_removebg') %></span>
+        <div class="ed-btnrow ed-actions-row" id="bgRemoveBgRow" data-available="<%= vendorLocal.bgRemoval ? '1' : '0' %>">
+          <button class="ed-wbtn" data-mode="transparent" title="<%= t('ed_img_removebg_transparent') %>"><%= t('ed_img_removebg_transparent') %></button>
+          <button class="ed-wbtn" data-mode="white" title="<%= t('ed_img_removebg_white') %>"><%= t('ed_img_removebg_white') %></button>
+        </div>
+        <button class="btn btn-ghost btn-sm ed-block" id="bgRemoveBgImageBtn" data-mode="image"><%= t('ed_img_removebg_image') %></button>
+        <input type="file" id="bgRemoveBgImageInput" accept="image/png,image/jpeg,image/webp" hidden>
+        <p class="ed-hint" id="bgRemoveBgHint"></p>
+
+        <span class="ed-glabel"><%= t('ed_img_decompose') %></span>
+        <button class="btn btn-ghost btn-sm ed-block" id="bgDecomposeBtn" data-available="<%= vendorLocal.decompose ? '1' : '0' %>"><%= t('ed_img_decompose_btn') %></button>
+        <p class="ed-hint" id="bgDecomposeHint"></p>
+        <div class="ed-decompose-results" id="bgDecomposeResults" hidden></div>
+
+        <span class="ed-glabel"><%= t('ed_lasso_title') %></span>
+        <button class="btn btn-ghost btn-sm ed-block" id="bgLassoBtn"><%= t('ed_lasso_btn') %></button>
+        <p class="ed-hint" id="bgLassoHint"></p>
+
+        <span class="ed-glabel"><%= t('ed_magicgrab_title') %></span>
+        <p class="ed-hint"><%= t('ed_magicgrab_desc') %></p>
+        <button class="btn btn-primary btn-sm ed-block" id="bgMagicGrabBtn"><%= t('ed_magicgrab_btn') %></button>
+        <p class="ed-hint" id="bgMagicGrabHint"></p>
+      </section>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <div class="ed-workspace" id="workspace">
+    <div class="ed-canvas-area" id="canvasArea">
+      <canvas id="c"></canvas>
+    </div>
+    <div class="ed-page-strip" id="pageStrip">
+      <div class="ed-page-strip-list" id="pageStripList"></div>
+      <button type="button" class="ed-page-add" id="pageAddBtn" title="<%= t('ed_page_add') %>" aria-label="<%= t('ed_page_add') %>">+</button>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <aside class="ed-right" id="rightPanel">
+    <button type="button" class="ed-panel-close" id="closeRightPanel" aria-label="<%= t('common_close') %>">✕</button>
+    <div class="ed-props-empty" id="propsEmpty"><p class="ed-hint"><%= t('ed_no_selection') %></p></div>
+    <div class="ed-props" id="props" hidden>
+
+      <div class="ed-prop-group" id="grpText" hidden>
+        <label class="ed-row"><span><%= t('ed_props_font') %></span>
+          <select id="pFont"></select></label>
+        <div class="ed-recent-fonts" id="recentFontsText" hidden></div>
+        <div class="ed-row2">
+          <label><span><%= t('ed_props_size') %></span><input type="number" id="pFontSize" min="4" max="800" step="1"></label>
+          <label><span><%= t('ed_props_color') %></span><input type="color" id="pTextColor"></label>
+        </div>
+        <div class="ed-swatches ed-swatches-sm" id="recentColorsText" hidden></div>
+        <div class="ed-btnrow">
+          <button id="pBold" title="<%= t('ed_props_bold') %>"><b>B</b></button>
+          <button id="pItalic" title="<%= t('ed_props_italic') %>"><i>I</i></button>
+          <button id="pUnderline" title="<%= t('ed_props_underline') %>"><u>U</u></button>
+          <span class="ed-sep"></span>
+          <button data-align="left" title="<%= t('ed_align_left') %>">⯇</button>
+          <button data-align="center" title="<%= t('ed_align_center_h') %>">≡</button>
+          <button data-align="right" title="<%= t('ed_align_right') %>">⯈</button>
+          <span class="ed-sep"></span>
+          <button id="pDir" title="<%= t('ed_props_direction') %>">⇄</button>
+        </div>
+        <div class="ed-row2">
+          <label><span><%= t('ed_props_line_height') %></span><input type="number" id="pLineHeight" min="0.5" max="3" step="0.05"></label>
+          <label><span><%= t('ed_props_letter_spacing') %></span><input type="number" id="pCharSpacing" min="-200" max="800" step="10"></label>
+        </div>
+        <label class="ed-row"><span><%= t('ed_text_curve') %></span>
+          <input type="range" id="pCurve" min="-150" max="150" step="5" value="0"><output id="pCurveOut">0</output></label>
+
+        <span class="ed-glabel"><%= t('ed_fx') %></span>
+        <label class="ed-row ed-fx-row"><span><input type="checkbox" id="fxShadow"> <%= t('ed_fx_shadow') %></span>
+          <input type="color" id="fxShadowColor" value="#000000"></label>
+        <label class="ed-row"><span><%= t('ed_fx_blur') %></span>
+          <input type="range" id="fxShadowBlur" min="0" max="40" step="1"><output id="fxShadowBlurOut">6</output></label>
+        <label class="ed-row ed-fx-row"><span><input type="checkbox" id="fxOutline"> <%= t('ed_fx_outline') %></span>
+          <input type="color" id="fxOutlineColor" value="#ffffff"></label>
+        <label class="ed-row"><span><%= t('ed_props_stroke_width') %></span>
+          <input type="range" id="fxOutlineW" min="1" max="20" step="1"><output id="fxOutlineWOut">2</output></label>
+        <label class="ed-row ed-fx-row"><span><input type="checkbox" id="fxHighlight"> <%= t('ed_fx_highlight') %></span>
+          <input type="color" id="fxHighlightColor" value="#ffe066"></label>
+      </div>
+
+      <div class="ed-prop-group" id="grpImage" hidden>
+        <span class="ed-glabel"><%= t('ed_img_filters') %></span>
+        <div class="ed-btnrow ed-actions-row" id="imgFilterPresets">
+          <button data-preset="none"><%= t('ed_filter_none') %></button>
+          <button data-preset="bw"><%= t('ed_filter_bw') %></button>
+          <button data-preset="vivid"><%= t('ed_filter_vivid') %></button>
+          <button data-preset="warm"><%= t('ed_filter_warm') %></button>
+          <button data-preset="cool"><%= t('ed_filter_cool') %></button>
+          <button data-preset="fade"><%= t('ed_filter_fade') %></button>
+          <button data-preset="vintage"><%= t('ed_filter_vintage') %></button>
+          <button data-preset="dramatic"><%= t('ed_filter_dramatic') %></button>
+        </div>
+        <span class="ed-glabel"><%= t('ed_img') %></span>
+        <label class="ed-row"><span><%= t('ed_img_brightness') %></span>
+          <input type="range" id="imgBright" min="-0.5" max="0.5" step="0.02" value="0"></label>
+        <label class="ed-row"><span><%= t('ed_img_contrast') %></span>
+          <input type="range" id="imgContrast" min="-0.5" max="0.5" step="0.02" value="0"></label>
+        <label class="ed-row"><span><%= t('ed_img_saturation') %></span>
+          <input type="range" id="imgSat" min="-1" max="1" step="0.04" value="0"></label>
+        <label class="ed-row"><span><%= t('ed_img_blur') %></span>
+          <input type="range" id="imgBlur" min="0" max="0.5" step="0.02" value="0"></label>
+        <label class="ed-row"><span><input type="checkbox" id="imgGray"> <%= t('ed_img_grayscale') %></span></label>
+        <div class="ed-btnrow ed-actions-row">
+          <button id="imgCrop" class="ed-wbtn"><%= t('ed_img_crop') %></button>
+          <button id="imgReset" class="ed-wbtn"><%= t('ed_img_reset') %></button>
+        </div>
+        <span class="ed-glabel"><%= t('ed_img_removebg') %></span>
+        <div class="ed-btnrow ed-actions-row" id="removeBgRow" data-available="<%= vendorLocal.bgRemoval ? '1' : '0' %>">
+          <button class="ed-wbtn" data-mode="transparent" title="<%= t('ed_img_removebg_transparent') %>"><%= t('ed_img_removebg_transparent') %></button>
+          <button class="ed-wbtn" data-mode="white" title="<%= t('ed_img_removebg_white') %>"><%= t('ed_img_removebg_white') %></button>
+        </div>
+        <button class="btn btn-ghost btn-sm ed-block" id="removeBgImageBtn" data-mode="image"><%= t('ed_img_removebg_image') %></button>
+        <input type="file" id="removeBgImageInput" accept="image/png,image/jpeg,image/webp" hidden>
+
+        <span class="ed-glabel"><%= t('ed_img_decompose') %></span>
+        <button class="btn btn-ghost btn-sm ed-block" id="decomposeBtn" data-available="<%= vendorLocal.decompose ? '1' : '0' %>"><%= t('ed_img_decompose_btn') %></button>
+        <p class="ed-hint" id="decomposeHint"></p>
+        <div class="ed-decompose-results" id="decomposeResults" hidden></div>
+
+        <span class="ed-glabel"><%= t('ed_lasso_title') %></span>
+        <button class="btn btn-ghost btn-sm ed-block" id="lassoBtn"><%= t('ed_lasso_btn') %></button>
+
+        <span class="ed-glabel"><%= t('ed_magicgrab_title') %></span>
+        <p class="ed-hint"><%= t('ed_magicgrab_desc') %></p>
+        <button class="btn btn-primary btn-sm ed-block" id="magicGrabBtn"><%= t('ed_magicgrab_btn') %></button>
+      </div>
+
+      <div class="ed-prop-group" id="grpFill" hidden>
+        <div class="ed-btnrow ed-actions-row" id="fillTypeRow">
+          <button data-filltype="solid" class="ed-wbtn"><%= t('ed_fill_solid') %></button>
+          <button data-filltype="gradient" class="ed-wbtn"><%= t('ed_fill_gradient') %></button>
+        </div>
+        <label class="ed-row" id="solidFillRow"><span><%= t('ed_props_fill') %></span><input type="color" id="pFill"></label>
+        <div class="ed-swatches ed-swatches-sm" id="recentColorsFill" hidden></div>
+        <div class="ed-row2" id="gradientFillRow" hidden>
+          <label><span><%= t('ed_gradient_start') %></span><input type="color" id="pGradStart" value="#7c5cff"></label>
+          <label><span><%= t('ed_gradient_end') %></span><input type="color" id="pGradEnd" value="#00c2ff"></label>
+        </div>
+        <label class="ed-row" id="gradientAngleRow" hidden><span><%= t('ed_gradient_angle') %></span>
+          <input type="range" id="pGradAngle" min="0" max="360" step="5" value="90"><output id="pGradAngleOut">90</output></label>
+        <label class="ed-row"><span><%= t('ed_props_stroke') %></span><input type="color" id="pStroke"></label>
+        <label class="ed-row"><span><%= t('ed_props_stroke_width') %></span>
+          <input type="range" id="pStrokeW" min="0" max="40" step="1"><output id="pStrokeWOut">0</output></label>
+      </div>
+
+      <div class="ed-prop-group" id="grpRadius" hidden>
+        <label class="ed-row"><span><%= t('ed_props_radius') %></span>
+          <input type="range" id="pRadius" min="0" max="200" step="1"><output id="pRadiusOut">0</output></label>
+      </div>
+
+      <div class="ed-prop-group">
+        <label class="ed-row"><span><%= t('ed_props_opacity') %></span>
+          <input type="range" id="pOpacity" min="0" max="1" step="0.01"><output id="pOpacityOut">1</output></label>
+        <div class="ed-row2">
+          <label><span>X</span><input type="number" id="pX" step="1"></label>
+          <label><span>Y</span><input type="number" id="pY" step="1"></label>
+        </div>
+        <div class="ed-row2">
+          <label><span>W</span><input type="number" id="pW" min="1" step="1"></label>
+          <label><span>H</span><input type="number" id="pH" min="1" step="1"></label>
+        </div>
+        <div class="ed-row2">
+          <label><span><%= t('ed_props_angle') %></span><input type="number" id="pAngle" step="1"></label>
+          <div class="ed-btnrow">
+            <button id="pFlipH" title="<%= t('ed_props_flip_h') %>">⇋</button>
+            <button id="pFlipV" title="<%= t('ed_props_flip_v') %>">⇅</button>
+            <button id="pLock" title="<%= t('ed_props_lock') %>">🔓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ed-prop-group">
+        <span class="ed-glabel"><%= t('ed_props_layer') %></span>
+        <div class="ed-btnrow">
+          <button data-layer="front" title="<%= t('ed_layer_front') %>">⤒</button>
+          <button data-layer="forward" title="<%= t('ed_layer_forward') %>">↑</button>
+          <button data-layer="backward" title="<%= t('ed_layer_backward') %>">↓</button>
+          <button data-layer="back" title="<%= t('ed_layer_back') %>">⤓</button>
+        </div>
+        <span class="ed-glabel"><%= t('ed_props_align') %></span>
+        <div class="ed-btnrow">
+          <button data-canvasalign="left" title="<%= t('ed_align_left') %>">⯇</button>
+          <button data-canvasalign="centerH" title="<%= t('ed_align_center_h') %>">⯀</button>
+          <button data-canvasalign="right" title="<%= t('ed_align_right') %>">⯈</button>
+          <button data-canvasalign="top" title="<%= t('ed_align_top') %>">⯅</button>
+          <button data-canvasalign="middle" title="<%= t('ed_align_middle') %>">⯀</button>
+          <button data-canvasalign="bottom" title="<%= t('ed_align_bottom') %>">⯆</button>
+        </div>
+        <div class="ed-btnrow ed-actions-row" id="distributeRow" hidden>
+          <button id="pDistH" class="ed-wbtn" title="<%= t('ed_distribute_h') %>"><%= t('ed_distribute_h') %></button>
+          <button id="pDistV" class="ed-wbtn" title="<%= t('ed_distribute_v') %>"><%= t('ed_distribute_v') %></button>
+        </div>
+        <div class="ed-btnrow ed-actions-row">
+          <button id="pSaveSticker" class="ed-wbtn" title="<%= t('ed_save_sticker_hint') %>"><%= t('ed_save_sticker') %></button>
+          <button id="pDuplicate" class="ed-wbtn"><%= t('ed_duplicate') %></button>
+          <button id="pDelete" class="ed-wbtn ed-danger"><%= t('ed_delete') %></button>
+        </div>
+        <p class="ed-hint" id="saveStickerHint"></p>
+      </div>
+
+    </div>
+  </aside>
+</div>
+
+<!-- first-visit welcome (localStorage-gated, see public/js/editor/onboard.js);
+     also reachable again later via the "?" shortcuts dropdown -->
+<div class="ed-onboard-backdrop" id="onboardBackdrop" hidden>
+  <div class="ed-onboard-modal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
+    <h2 id="onboardTitle"><%= t('ed_onboard_title') %></h2>
+    <p class="ed-onboard-sub"><%= t('ed_onboard_sub') %></p>
+    <ul class="ed-onboard-list">
+      <li><%- icon('tpl') %><span><%= t('ed_onboard_templates') %></span></li>
+      <li><%- icon('shapes') %><span><%= t('ed_onboard_elements') %></span></li>
+      <li><%- icon('upload') %><span><%= t('ed_onboard_photos') %></span></li>
+      <li><%- icon('text') %><span><%= t('ed_onboard_text') %></span></li>
+      <li><%- icon('download') %><span><%= t('ed_onboard_download') %></span></li>
+    </ul>
+    <button class="btn btn-primary ed-block" id="onboardStart"><%= t('ed_onboard_start') %></button>
+  </div>
+</div>
+
+<!-- Bulk Create: generate many pages from one CSV, one per row, by mapping
+     CSV columns onto the text layers of the current page -->
+<div class="ed-onboard-backdrop" id="bulkBackdrop" hidden>
+  <div class="ed-onboard-modal ed-bulk-modal" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+    <h2 id="bulkTitle"><%= t('ed_bulk') %></h2>
+    <p class="ed-onboard-sub"><%= t('ed_bulk_desc') %></p>
+
+    <label class="ed-bulk-label"><%= t('ed_bulk_csv_label') %></label>
+    <textarea id="bulkCsv" class="ed-bulk-textarea" rows="5" placeholder="<%= t('ed_bulk_csv_placeholder') %>"></textarea>
+    <div class="ed-bulk-csv-row">
+      <label class="btn btn-ghost btn-sm" for="bulkCsvFile"><%= t('ed_bulk_csv_upload') %></label>
+      <input type="file" id="bulkCsvFile" accept=".csv,text/csv" hidden>
+      <span class="ed-hint" id="bulkCsvSummary"></span>
+    </div>
+
+    <div id="bulkFieldsWrap" hidden>
+      <label class="ed-bulk-label"><%= t('ed_bulk_fields_label') %></label>
+      <div id="bulkFields" class="ed-bulk-fields"></div>
+    </div>
+    <p class="ed-hint" id="bulkNoFields" hidden><%= t('ed_bulk_no_fields') %></p>
+
+    <div class="ed-bulk-actions">
+      <button class="btn btn-ghost btn-sm" id="bulkCancel"><%= t('common_cancel') %></button>
+      <button class="btn btn-primary btn-sm" id="bulkGenerate" disabled><%= t('ed_bulk_generate') %></button>
+    </div>
+    <p class="ed-hint" id="bulkHint"></p>
+  </div>
+</div>
+
+<div class="ed-ctxmenu" id="ctxMenu" hidden>
+  <button data-ctx="duplicate"><%= t('ed_duplicate') %></button>
+  <button data-ctx="front"><%= t('ed_layer_front') %></button>
+  <button data-ctx="back"><%= t('ed_layer_back') %></button>
+  <button data-ctx="lock"><%= t('ed_props_lock') %></button>
+  <button data-ctx="delete" class="ed-danger"><%= t('ed_delete') %></button>
+</div>
+
+<!-- floating toolbar over the current selection -->
+<div class="ed-floatbar" id="floatbar" hidden>
+  <input type="color" id="fbColor" title="<%= t('ed_props_color') %>">
+  <button id="fbBold" title="<%= t('ed_props_bold') %>"><b>B</b></button>
+  <button id="fbForward" title="<%= t('ed_layer_forward') %>"><%- icon('up') %></button>
+  <button id="fbBackward" title="<%= t('ed_layer_backward') %>"><%- icon('down') %></button>
+  <button id="fbDup" title="<%= t('ed_duplicate') %>"><%- icon('copy') %></button>
+  <button id="fbLock" title="<%= t('ed_props_lock') %>"><%- icon('unlock') %></button>
+  <button id="fbDelete" class="ed-danger" title="<%= t('ed_delete') %>"><%- icon('trash') %></button>
+  <button id="fbMore" class="ed-floatbar-more" title="<%= t('ed_more_options') %>" aria-label="<%= t('ed_more_options') %>">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="15" cy="6" r="1.6" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.6" fill="currentColor" stroke="none"/></svg>
+  </button>
+</div>
+
+<!-- crop mode bar -->
+<div class="ed-cropbar" id="cropbar" hidden>
+  <span><%= t('ed_img_crop') %></span>
+  <button class="btn btn-primary btn-sm" id="cropApply"><%= t('ed_img_crop_apply') %></button>
+  <button class="btn btn-ghost btn-sm" id="cropReset"><%= t('ed_img_crop_reset') %></button>
+  <button class="btn btn-ghost btn-sm" id="cropCancel"><%= t('ed_img_crop_cancel') %></button>
+</div>
+
+<!-- freehand-select mode bar -->
+<div class="ed-cropbar" id="lassobar" hidden>
+  <span id="lassoHint"><%= t('ed_lasso_hint_draw') %></span>
+  <button class="btn btn-primary btn-sm" id="lassoExtract" disabled><%= t('ed_lasso_extract') %></button>
+  <button class="btn btn-primary btn-sm" id="lassoErase" disabled><%= t('ed_lasso_erase') %></button>
+  <button class="btn btn-ghost btn-sm" id="lassoRedraw"><%= t('ed_lasso_redraw') %></button>
+  <button class="btn btn-ghost btn-sm" id="lassoDone"><%= t('ed_lasso_done') %></button>
+</div>
+
+<!-- Magic Grab mode bar -->
+<div class="ed-cropbar ed-magicgrabbar" id="magicgrabbar" hidden>
+  <div class="ed-btnrow ed-magicgrab-modes">
+    <button type="button" class="ed-wbtn" data-mggmode="foreground"><%= t('ed_magicgrab_mode_foreground') %></button>
+    <button type="button" class="ed-wbtn" data-mggmode="click"><%= t('ed_magicgrab_mode_click') %></button>
+    <button type="button" class="ed-wbtn" data-mggmode="brush"><%= t('ed_magicgrab_mode_brush') %></button>
+  </div>
+  <label class="ed-magicgrab-brush-row" id="magicgrabBrushRow" hidden>
+    <span><%= t('ed_magicgrab_brush_size') %></span>
+    <input type="range" id="magicgrabBrushSize" min="8" max="150" step="2" value="40">
+  </label>
+  <span id="magicgrabHint"></span>
+  <button class="btn btn-ghost btn-sm" id="magicgrabClear" disabled><%= t('ed_magicgrab_clear') %></button>
+  <button class="btn btn-primary btn-sm" id="magicgrabGrab" disabled><%= t('ed_magicgrab_grab') %></button>
+  <button class="btn btn-ghost btn-sm" id="magicgrabDone"><%= t('ed_lasso_done') %></button>
+</div>
+
+<script id="edData" type="application/json"><%- JSON.stringify({
+  id: design.id,
+  title: design.title,
+  width: design.width,
+  height: design.height,
+  data: design.data_json || '',
+  shareToken: design.share_token || null,
+  lang: lang,
+  maxUploadMb: config.maxUploadMb,
+  bgRemoval: {
+    available: vendorLocal.bgRemoval,
+    bundleUrl: '/static/vendor/mediapipe/vision_bundle.mjs',
+    wasmBase: '/static/vendor/mediapipe',
+    modelPath: '/static/vendor/mediapipe/selfie_segmenter.tflite',
+  },
+  decompose: {
+    available: vendorLocal.decompose,
+    tfUrl: '/static/vendor/tf.min.js',
+    cocoSsdUrl: '/static/vendor/coco-ssd.min.js',
+    modelUrl: '/static/vendor/coco-ssd-model/model.json',
+  },
+  magicGrab: {
+    modelAvailable: vendorLocal.magicGrabModel,
+    inpaintAvailable: vendorLocal.magicGrabInpaint,
+    ortUrl: '/static/vendor/magicgrab/ort.min.js',
+    wasmBase: '/static/vendor/magicgrab/',
+    encoderUrl: '/static/vendor/magicgrab/mobilesam.encoder.onnx',
+    decoderUrl: '/static/vendor/magicgrab/mobilesam.decoder.onnx',
+    opencvUrl: '/static/vendor/magicgrab/opencv.js',
+  },
+  ai: { dailyLimit: config.aiDailyLimit },
+  stock: { available: !!config.pexelsApiKey },
+  gif: { available: vendorLocal.gif, workerUrl: '/static/vendor/gif.worker.js' },
+  i18n: {
+    replaceTplConfirm: t('ed_replace_template_confirm'),
+    deleteTplConfirm: t('ed_delete_template_confirm'),
+    saveTplWorking: t('ed_save_tpl_working'), saveTplDone: t('ed_save_tpl_done'), saveTplError: t('ed_save_tpl_error'),
+    heading: t('ed_heading'), subheading: t('ed_subheading'), body: t('ed_body'),
+    uploadsEmpty: t('ed_uploads_empty'),
+    useAsBackground: t('ed_upload_use_bg'),
+    layersEmpty: t('ed_layers_empty'), bg: t('ed_layer_bg'), noResults: t('common_no_results'),
+    removeBgLabel: t('ed_img_removebg'), removeBgWorking: t('ed_img_removebg_working'),
+    removeBgUnavailable: t('ed_img_removebg_unavailable'), removeBgError: t('ed_img_removebg_error'),
+    bgNoImage: t('ed_bg_no_image'),
+    decomposeWorking: t('ed_img_decompose_working'), decomposeUnavailable: t('ed_img_decompose_unavailable'),
+    decomposeError: t('ed_img_decompose_error'), decomposeNone: t('ed_img_decompose_none'),
+    decomposePick: t('ed_img_decompose_pick'),
+    decomposeExtract: t('ed_img_decompose_extract'),
+    decomposeErase: t('ed_img_decompose_erase'),
+    decomposeEraseWorking: t('ed_img_decompose_erase_working'),
+    decomposeEraseError: t('ed_img_decompose_erase_error'),
+    decomposeDone: t('ed_img_decompose_done'),
+    decomposeExtractAll: t('ed_decompose_extract_all'), decomposeExtractAllHint: t('ed_decompose_extract_all_hint'),
+    removeBgTransparent: t('ed_img_removebg_transparent'),
+    removeBgWhite: t('ed_img_removebg_white'),
+    removeBgImage: t('ed_img_removebg_image'),
+    removeBgNone: t('ed_img_decompose_crop_only'),
+    lassoHintDraw: t('ed_lasso_hint_draw'), lassoHintReady: t('ed_lasso_hint_ready'),
+    lassoTooSmall: t('ed_lasso_too_small'), lassoError: t('ed_lasso_error'),
+    lassoLayerName: t('ed_lasso_layer_name'),
+    magicGrabHintClick: t('ed_magicgrab_hint_click'), magicGrabHintBrush: t('ed_magicgrab_hint_brush'),
+    magicGrabHintReady: t('ed_magicgrab_hint_ready'), magicGrabAnalyzing: t('ed_magicgrab_analyzing'),
+    magicGrabWorking: t('ed_magicgrab_working'), magicGrabGrabbing: t('ed_magicgrab_grabbing'),
+    magicGrabInpainting: t('ed_magicgrab_inpainting'), magicGrabError: t('ed_magicgrab_error'),
+    magicGrabNone: t('ed_magicgrab_none'), magicGrabLayerName: t('ed_magicgrab_layer_name'),
+    magicGrabModelUnavailable: t('ed_magicgrab_model_unavailable'),
+    aiWorking: t('ed_ai_working'),
+    aiQuota: t('ed_ai_quota', { limit: config.aiDailyLimit }),
+    aiError: t('ed_ai_error'), aiGenerateBtn: t('ed_ai_generate_btn'),
+    shareCopied: t('ed_share_copied'),
+    historyEmpty: t('ed_history_empty'), historyLoading: t('ed_history_loading'), historyError: t('ed_history_error'),
+    historyRestore: t('ed_history_restore'), historyRestoreConfirm: t('ed_history_restore_confirm'),
+    bulkIgnore: t('ed_bulk_ignore'), bulkWorking: t('ed_bulk_working'), bulkDone: t('ed_bulk_done'),
+    bulkError: t('ed_bulk_error'), bulkNeedCsv: t('ed_bulk_need_csv'), bulkNeedMapping: t('ed_bulk_need_mapping'),
+    bulkTruncated: t('ed_bulk_truncated'),
+    presentClose: t('ed_present_close'), presentPrev: t('ed_present_prev'), presentNext: t('ed_present_next'),
+    mwWorking: t('ed_magicwrite_working'), mwEmpty: t('ed_magicwrite_empty'),
+    mwError: t('ed_magicwrite_error'), mwQuota: t('ed_magicwrite_quota', { limit: config.aiDailyLimit }),
+    saved: t('ed_saved'), saving: t('ed_saving'), unsaved: t('ed_unsaved'), saveError: t('ed_save_error'),
+    pageDelete: t('ed_page_delete'), pageDeleteConfirm: t('ed_page_delete_confirm'),
+    stockHint: t('ed_stock_hint'), stockNoResults: t('common_no_results'), stockMore: t('ed_stock_more'),
+    stockLoading: t('ed_stock_loading'), stockImporting: t('ed_stock_importing'), stockError: t('ed_stock_error'),
+    qrPlaceholder: t('ed_qr_placeholder'), qrWorking: t('ed_qr_working'), qrError: t('ed_qr_error'), qrEmpty: t('ed_qr_empty'),
+    brandApplyWorking: t('ed_brand_apply_working'), brandApplyDone: t('ed_brand_apply_done'), brandApplyEmpty: t('ed_brand_apply_empty'),
+    gifWorking: t('ed_download_gif_working'), gifError: t('ed_download_gif_error'),
+    zipWorking: t('ed_download_zip_working'), zipError: t('ed_download_zip_error'), zipUnavailable: t('ed_download_zip_unavailable'),
+    chartUpdate: t('ed_chart_update'),
+    brandFontUploading: t('ed_brand_font_uploading'), brandFontError: t('ed_brand_font_error'),
+    saveStickerWorking: t('ed_save_sticker_working'), saveStickerDone: t('ed_save_sticker_done'), saveStickerError: t('ed_save_sticker_error'),
+    names: {
+      text: t('ed_name_text'), rect: t('ed_name_rect'), circle: t('ed_name_circle'),
+      ellipse: t('ed_name_ellipse'), triangle: t('ed_name_triangle'), line: t('ed_name_line'),
+      path: t('ed_name_path'), polygon: t('ed_name_polygon'), image: t('ed_name_image'), group: t('ed_name_group')
+    },
+    elCats: {
+      all: t('common_all'), lines: t('ed_el_lines'), shapes: t('ed_el_shapes'), arrows: t('ed_el_arrows'),
+      badges: t('ed_el_badges'), speech: t('ed_el_speech'), frames: t('ed_el_frames'), decor: t('ed_el_decor'),
+      icons: t('ed_el_icons'), social: t('ed_el_social'), stickers: t('ed_el_stickers')
+    },
+    resizeCats: {
+      social: t('ed_resize_cat_social'), presentation: t('ed_resize_cat_presentation'), print: t('ed_resize_cat_print')
+    },
+    tplCats: {
+      all: t('tpl_cat_all'), social: t('tpl_cat_social'), presentation: t('tpl_cat_presentation'),
+      business: t('tpl_cat_business'), marketing: t('tpl_cat_marketing'), personal: t('tpl_cat_personal'),
+      mine: t('tpl_cat_mine')
+    }
+  }
+}).replace(/</g, '\\u003c') %></script>
+
+<script src="<%= vendorLocal.fabric ? '/static/vendor/fabric.min.js' : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js' %>"></script>
+<script src="<%= vendorLocal.jspdf ? '/static/vendor/jspdf.umd.min.js' : 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js' %>"></script>
+<% if (vendorLocal.gif) { %><script src="/static/vendor/gif.js"></script><% } %>
+<script src="<%= vendorLocal.zip ? '/static/vendor/jszip.min.js' : 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js' %>"></script>
+<script src="/static/js/editor/core.js" defer></script>
+<script src="/static/js/editor/objects.js" defer></script>
+<script src="/static/js/editor/props.js" defer></script>
+<script src="/static/js/editor/brand.js" defer></script>
+<script src="/static/js/editor/io.js" defer></script>
+<script src="/static/js/editor/bgremoval.js" defer></script>
+<script src="/static/js/editor/removebg-tab.js" defer></script>
+<script src="/static/js/editor/ai.js" defer></script>
+<script src="/static/js/editor/stock.js" defer></script>
+<script src="/static/js/editor/qr.js" defer></script>
+<script src="/static/js/editor/decompose.js" defer></script>
+<script src="/static/js/editor/decompose-tab.js" defer></script>
+<script src="/static/js/editor/lasso.js" defer></script>
+<script src="/static/js/editor/magicgrab.js" defer></script>
+<script src="/static/js/editor/frames.js" defer></script>
+<script src="/static/js/editor/draw.js" defer></script>
+<script src="/static/js/editor/charts.js" defer></script>
+<script src="/static/js/editor/table.js" defer></script>
+<script src="/static/js/editor/onboard.js" defer></script>
+<script src="/static/js/editor/versions.js" defer></script>
+<script src="/static/js/editor/bulk.js" defer></script>
+<script src="/static/js/editor/present.js" defer></script>
+<script src="/static/js/editor/write.js" defer></script>
+</body>
+</html>

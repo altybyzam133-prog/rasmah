@@ -1,0 +1,16 @@
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span class="brand small">
+      <img class="brand-logo" src="/static/img/logo.svg" alt="">
+      <%= brandName %>
+    </span>
+    <p class="muted">© <%= year %> <%= brandName %> — <%= t('footer_rights') %>. <%= t('footer_made') %>.</p>
+  </div>
+</footer>
+<% if (flash) { %>
+<div class="toast toast-<%= flash.type %>" role="status"><%= flash.msg %></div>
+<% } %>
+<script src="/static/js/main.js" defer></script>
+</body>
+</html>

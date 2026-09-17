@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= dir %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title>Admin — <%= brandName %></title>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .admin-wrap { max-width: 1100px; margin-inline: auto; padding: 24px 20px 60px; }
+    .admin-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .tpl-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .tpl-table th, .tpl-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: start; }
+    .tpl-table input[type=text], .tpl-table input[type=number], .tpl-table select {
+      width: 100%; padding: 5px 7px; border: 1px solid var(--border-strong); border-radius: 6px; font: inherit; font-size: .82rem;
+    }
+    .tpl-table input[type=number] { width: 64px; }
+    .admin-import { margin-top: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+    .admin-import textarea { width: 100%; min-height: 120px; font-family: monospace; font-size: .78rem; padding: 8px; border: 1px solid var(--border-strong); border-radius: 8px; }
+    .ai-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+    .ai-row label { display: grid; gap: 3px; font-size: .78rem; font-weight: 600; }
+    .ai-row input, .ai-row select { padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 6px; font: inherit; }
+  </style>
+</head>
+<body>
+<div class="admin-wrap">
+  <div class="admin-bar">
+    <h1 style="margin:0">القوالب / Templates <span class="muted">(<%= templates.length %>)</span></h1>
+    <form method="post" action="/admin/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-sm">Logout</button></form>
+  </div>
+
+  <% if (ok) { %><p class="form-ok">تم الحفظ / Saved</p><% } %>
+  <% if (error) { %><p class="form-error"><%= error %></p><% } %>
+
+  <table class="tpl-table">
+    <thead><tr><th>#</th><th>slug</th><th>الاسم عربي</th><th>الاسم إنجليزي</th><th>التصنيف</th><th>ترتيب</th><th>مقاس</th><th>نشط</th><th></th></tr></thead>
+    <tbody>
+      <% templates.forEach(function(t){ %>
+      <tr>
+        <form method="post" action="/admin/templates/<%= t.id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <td><%= t.id %></td>
+          <td class="muted"><%= t.slug %></td>
+          <td><input type="text" name="name_ar" value="<%= t.name_ar %>"></td>
+          <td><input type="text" name="name_en" value="<%= t.name_en %>"></td>
+          <td><select name="category"><% cats.forEach(function(c){ %><option value="<%= c %>" <%= t.category===c?'selected':'' %>><%= c %></option><% }); %></select></td>
+          <td><input type="number" name="sort_order" value="<%= t.sort_order %>"></td>
+          <td class="muted"><%= t.width %>×<%= t.height %></td>
+          <td><input type="checkbox" name="active" <%= t.active ? 'checked' : '' %>></td>
+          <td><button class="btn btn-primary btn-sm">حفظ</button></td>
+        </form>
+        <td>
+          <form method="post" action="/admin/templates/<%= t.id %>/delete" onsubmit="return confirm('حذف هذا القالب؟')">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-danger btn-sm">حذف</button>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <div class="admin-import">
+    <h2 style="margin-top:0">استيراد قالب جديد / Import a template</h2>
+    <p class="muted small">الصق ناتج <code>ED.serialize()</code> من وحدة تحكم المتصفح داخل المحرّر (يحتوي <code>objects</code> ومنها <code>__artboard</code>).</p>
+    <form method="post" action="/admin/import">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="ai-row">
+        <label>slug<input type="text" name="slug" required></label>
+        <label>الاسم عربي<input type="text" name="name_ar"></label>
+        <label>الاسم إنجليزي<input type="text" name="name_en"></label>
+        <label>التصنيف<select name="category"><% cats.forEach(function(c){ %><option value="<%= c %>"><%= c %></option><% }); %></select></label>
+        <label>العرض<input type="number" name="width" required></label>
+        <label>الارتفاع<input type="number" name="height" required></label>
+        <label>الترتيب<input type="number" name="sort_order" value="999"></label>
+      </div>
+      <textarea name="data_json" placeholder='{"version":"5.3.0","objects":[...]}' required></textarea>
+      <div style="margin-top:10px"><button class="btn btn-primary">استيراد</button></div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

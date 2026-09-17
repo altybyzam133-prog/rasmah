@@ -1,0 +1,36 @@
+<header class="site-header">
+  <div class="wrap navbar">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/static/img/logo.svg" alt="">
+      <span><%= brandName %></span>
+    </a>
+
+    <nav class="site-nav">
+      <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>"><%= t('nav_home') %></a>
+      <a href="/templates" class="<%= currentPath.startsWith('/templates') ? 'active' : '' %>"><%= t('nav_templates') %></a>
+      <% if (user) { %>
+        <a href="/community" class="<%= currentPath.startsWith('/community') ? 'active' : '' %>"><%= t('nav_community') %></a>
+        <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>"><%= t('nav_dashboard') %></a>
+      <% } %>
+    </nav>
+
+    <div class="nav-right">
+      <a class="lang-switch" href="<%= switchLangUrl %>" aria-label="language">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+        <span class="lang-switch-text"><%= t('switch_to') %></span>
+      </a>
+      <% if (user) { %>
+        <a class="lang-switch <%= currentPath.startsWith('/account') ? 'active' : '' %>" href="/account"><%= t('nav_account') %></a>
+        <form method="post" action="/logout" class="inline-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-ghost btn-sm"><%= t('nav_logout') %></button>
+        </form>
+        <a class="btn btn-primary btn-sm" href="/dashboard"><%= t('nav_create') %></a>
+      <% } else { %>
+        <a class="btn btn-ghost btn-sm" href="/login"><%= t('nav_login') %></a>
+        <a class="btn btn-primary btn-sm" href="/register"><%= t('nav_register') %></a>
+      <% } %>
+    </div>
+  </div>
+</header>
+<main class="page">

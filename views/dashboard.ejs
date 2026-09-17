@@ -1,0 +1,136 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+
+<section class="wrap dash" data-folder-prompt="<%= t('dash_folder_prompt') %>">
+  <div class="section-head">
+    <h1><%= t('dash_title') %></h1>
+    <div class="section-head-actions">
+      <button type="button" class="btn btn-primary" id="newDesignBtn"><%= t('dash_new') %></button>
+      <a class="btn btn-ghost" href="/templates"><%= t('dash_browse_templates') %></a>
+      <a class="btn btn-ghost" href="/community"><%= t('dash_browse_community') %></a>
+    </div>
+  </div>
+
+  <% if (!designs.length) { %>
+    <div class="empty">
+      <div class="empty-art" aria-hidden="true"></div>
+      <h2><%= t('dash_empty_title') %></h2>
+      <p class="muted"><%= t('dash_empty_sub') %></p>
+      <div class="empty-actions">
+        <button type="button" class="btn btn-primary" id="newDesignBtn2"><%= t('dash_empty_cta') %></button>
+        <a class="btn btn-ghost" href="/templates"><%= t('dash_browse_templates') %></a>
+      </div>
+    </div>
+  <% } else { %>
+    <% const folders = [...new Set(designs.map(function(d){ return d.folder; }).filter(Boolean))].sort(); %>
+    <% if (folders.length) { %>
+      <div class="dash-folders" id="dashFolders">
+        <button type="button" class="dash-folder-chip active" data-folder=""><%= t('dash_folder_all') %></button>
+        <button type="button" class="dash-folder-chip" data-folder="__none__"><%= t('dash_folder_none') %></button>
+        <% folders.forEach(function(f){ %>
+          <button type="button" class="dash-folder-chip" data-folder="<%= f %>"><%= f %></button>
+        <% }); %>
+      </div>
+    <% } %>
+    <div class="dash-toolbar">
+      <input type="search" id="dashSearch" placeholder="<%= t('dash_search') %>" aria-label="<%= t('dash_search') %>">
+      <select id="dashSort" aria-label="sort">
+        <option value="recent"><%= t('dash_sort_recent') %></option>
+        <option value="oldest"><%= t('dash_sort_oldest') %></option>
+        <option value="name"><%= t('dash_sort_name') %></option>
+      </select>
+    </div>
+    <p class="empty-line muted" id="dashNoResults" hidden><%= t('dash_no_results') %></p>
+    <div class="design-grid">
+      <% designs.forEach(function(d){ %>
+        <article class="design-card" data-id="<%= d.id %>" data-confirm="<%= t('dash_confirm_delete') %>"
+                 data-title="<%= (d.title || '').toLowerCase() %>" data-updated="<%= d.updated_at %>" data-created="<%= d.created_at %>"
+                 data-folder="<%= d.folder || '' %>" data-public="<%= d.is_public ? '1' : '0' %>">
+          <a class="design-thumb" href="/editor/<%= d.id %>" style="aspect-ratio: <%= d.width %> / <%= d.height %>">
+            <% if (d.thumbnail) { %>
+              <img src="<%= d.thumbnail %>" alt="">
+            <% } else { %>
+              <span class="design-thumb-empty">Aa</span>
+            <% } %>
+            <% if (d.pages > 1) { %>
+              <span class="design-pages-badge"><%= d.pages %></span>
+            <% } %>
+            <% if (d.is_public) { %>
+              <span class="design-public-badge" title="<%= t('dash_published') %>">🌐</span>
+            <% } %>
+          </a>
+          <div class="design-meta">
+            <span class="design-title" title="<%= d.title %>"><%= d.title || t('common_untitled') %></span>
+            <% if (d.folder) { %><span class="design-folder-badge">📁 <%= d.folder %></span><% } %>
+            <div class="design-actions">
+              <button type="button" data-act="publish" title="<%= d.is_public ? t('dash_unpublish') : t('dash_publish') %>" aria-label="<%= d.is_public ? t('dash_unpublish') : t('dash_publish') %>"><%= d.is_public ? '🌐' : '📤' %></button>
+              <button type="button" data-act="folder" title="<%= t('dash_move_folder') %>" aria-label="<%= t('dash_move_folder') %>">📁</button>
+              <button type="button" data-act="rename" title="<%= t('common_rename') %>" aria-label="<%= t('common_rename') %>">✎</button>
+              <button type="button" data-act="duplicate" title="<%= t('common_duplicate') %>" aria-label="<%= t('common_duplicate') %>">⧉</button>
+              <button type="button" data-act="delete" title="<%= t('common_delete') %>" aria-label="<%= t('common_delete') %>">🗑</button>
+            </div>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<!-- new-design modal -->
+<div class="modal" id="newDesignModal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="ndTitle">
+    <div class="modal-head">
+      <h2 id="ndTitle"><%= t('dash_new_title') %></h2>
+      <button type="button" class="modal-x" data-close aria-label="<%= t('common_close') %>">✕</button>
+    </div>
+    <div id="ndStepSize">
+      <div class="size-grid">
+        <% const sizes = [
+          ['ig_post',1080,1080], ['ig_story',1080,1920], ['x_post',1600,900],
+          ['fb_cover',1640,624], ['yt_thumb',1280,720], ['presentation',1920,1080],
+          ['a4',1240,1754], ['poster',1240,1754], ['business_card',1050,600], ['logo',500,500]
+        ]; sizes.forEach(function(s){ %>
+          <button type="button" class="size-tile" data-w="<%= s[1] %>" data-h="<%= s[2] %>">
+            <span class="size-ic" style="aspect-ratio: <%= s[1] %> / <%= s[2] %>"></span>
+            <span class="size-name"><%= t('dash_size_' + s[0]) %></span>
+            <span class="size-dim"><%= s[1] %>×<%= s[2] %></span>
+          </button>
+        <% }); %>
+      </div>
+      <form class="custom-size" id="customSizeForm">
+        <span class="custom-label"><%= t('dash_new_custom') %></span>
+        <label><%= t('dash_new_width') %><input type="number" id="cw" min="16" max="8000" value="1200"></label>
+        <label><%= t('dash_new_height') %><input type="number" id="ch" min="16" max="8000" value="1200"></label>
+        <button type="submit" class="btn btn-primary btn-sm"><%= t('dash_new_create') %></button>
+      </form>
+
+      <label class="from-photo" id="fromPhotoDrop" data-working="<%= t('dash_new_from_photo_working') %>">
+        <input type="file" id="fromPhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+        <span class="custom-label"><%= t('dash_new_from_photo') %></span>
+        <small class="muted"><%= t('dash_new_from_photo_hint') %></small>
+      </label>
+    </div>
+
+    <!-- step 2: after a size is chosen, decide what to start with -->
+    <div id="ndStepStart" hidden>
+      <button type="button" class="modal-back" id="ndBack">&larr; <%= t('common_back') %></button>
+      <p class="nd-start-size" id="ndStartSize"></p>
+      <div class="nd-start-choice">
+        <button type="button" class="nd-start-opt" id="ndStartBlank">
+          <span class="nd-start-ic" aria-hidden="true">▢</span>
+          <span><%= t('dash_new_start_blank') %></span>
+        </button>
+        <label class="nd-start-opt" id="ndStartPhotoOpt">
+          <input type="file" id="ndStartPhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+          <span class="nd-start-ic" aria-hidden="true">&#128444;</span>
+          <span><%= t('dash_new_start_photo') %></span>
+        </label>
+      </div>
+      <p class="ed-hint" id="ndStartHint"></p>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+<script src="/static/js/dashboard.js" defer></script>

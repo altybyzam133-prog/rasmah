@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= dir %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#7c5cff">
+  <meta name="robots" content="<%= typeof noindex !== 'undefined' && noindex ? 'noindex' : 'index,follow' %>">
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+  <title><%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle + ' — ' : '' %><%= brandName %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <% if (typeof extraCss !== 'undefined') { %><link rel="stylesheet" href="<%= extraCss %>"><% } %>
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+  <link rel="apple-touch-icon" href="/static/img/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">

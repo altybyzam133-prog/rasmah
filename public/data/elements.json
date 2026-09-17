@@ -1,0 +1,426 @@
+{
+  "categories": [
+    "lines",
+    "shapes",
+    "arrows",
+    "badges",
+    "speech",
+    "frames",
+    "decor",
+    "icons",
+    "social",
+    "stickers"
+  ],
+  "items": [
+    {
+      "id": "line-solid",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><rect x='2' y='8' width='96' height='4' rx='2' fill='#1b1830'/></svg>"
+    },
+    {
+      "id": "line-thick",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><rect x='2' y='5' width='96' height='10' rx='5' fill='#1b1830'/></svg>"
+    },
+    {
+      "id": "line-dashed",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><line x1='2' y1='10' x2='98' y2='10' stroke='#1b1830' stroke-width='4' stroke-linecap='round' stroke-dasharray='10 8'/></svg>"
+    },
+    {
+      "id": "line-dotted",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><line x1='3' y1='10' x2='97' y2='10' stroke='#1b1830' stroke-width='5' stroke-linecap='round' stroke-dasharray='0.5 12'/></svg>"
+    },
+    {
+      "id": "line-double",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><rect x='2' y='5' width='96' height='3' fill='#1b1830'/><rect x='2' y='12' width='96' height='3' fill='#1b1830'/></svg>"
+    },
+    {
+      "id": "line-wavy",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><path d='M2 10 q 8 -8 16 0 t 16 0 t 16 0 t 16 0 t 16 0' fill='none' stroke='#1b1830' stroke-width='3' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "line-zigzag",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><path d='M2 15 L14 5 L26 15 L38 5 L50 15 L62 5 L74 15 L86 5 L98 15' fill='none' stroke='#1b1830' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+    },
+    {
+      "id": "line-arrow",
+      "cat": "lines",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'><path d='M2 10 H90 M78 3 L92 10 L78 17' fill='none' stroke='#1b1830' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+    },
+    {
+      "id": "pentagon",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 5 L95 39 L78 92 L22 92 L5 39 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "hexagon",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M25 8 L75 8 L98 50 L75 92 L25 92 L2 50 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "octagon",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 3 L70 3 L97 30 L97 70 L70 97 L30 97 L3 70 L3 30 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "diamond",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 3 L97 50 L50 97 L3 50 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "heart",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 88 C 12 60 6 34 24 22 C 38 13 50 24 50 32 C 50 24 62 13 76 22 C 94 34 88 60 50 88 Z' fill='#ff5c8a'/></svg>"
+    },
+    {
+      "id": "cloud",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 72 a20 20 0 0 1 0 -40 a24 24 0 0 1 46 -6 a18 18 0 0 1 4 46 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "blob-1",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M52 8 C 74 6 94 24 92 48 C 90 72 78 92 52 92 C 26 92 8 74 10 48 C 12 24 30 10 52 8 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "blob-2",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M60 6 C 84 10 96 30 90 52 C 84 74 92 88 70 94 C 48 100 22 90 12 66 C 2 42 14 18 34 10 C 44 6 52 4 60 6 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "semicircle",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M5 50 a45 45 0 0 1 90 0 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "quarter",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M8 8 H92 A84 84 0 0 1 8 92 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "plus",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M38 8 H62 V38 H92 V62 H62 V92 H38 V62 H8 V38 H38 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "ring",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='none' stroke='#7c5cff' stroke-width='14'/></svg>"
+    },
+    {
+      "id": "pill",
+      "cat": "shapes",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><rect x='4' y='6' width='92' height='48' rx='24' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "arrow-right",
+      "cat": "arrows",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M8 40 H60 V22 L94 50 L60 78 V60 H8 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "arrow-chevron",
+      "cat": "arrows",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 12 L74 50 L30 88' fill='none' stroke='#7c5cff' stroke-width='16' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+    },
+    {
+      "id": "arrow-curved",
+      "cat": "arrows",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M12 78 C 20 30 55 18 84 22 M84 22 L70 10 M84 22 L74 38' fill='none' stroke='#7c5cff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+    },
+    {
+      "id": "arrow-double",
+      "cat": "arrows",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M6 50 L28 30 V42 H72 V30 L94 50 L72 70 V58 H28 V70 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "arrow-up",
+      "cat": "arrows",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M60 92 V40 H78 L50 6 L22 40 H40 V92 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "star-5",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 4 L61 38 L97 38 L68 60 L79 94 L50 72 L21 94 L32 60 L3 38 L39 38 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "star-4",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 4 L60 40 L96 50 L60 60 L50 96 L40 60 L4 50 L40 40 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "star-6",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 3 L63 28 L91 28 L77 52 L91 76 L63 76 L50 100 L37 76 L9 76 L23 52 L9 28 L37 28 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "burst",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 2 L58 16 L72 8 L74 24 L90 22 L84 37 L98 44 L86 54 L96 66 L80 68 L82 84 L67 78 L62 94 L50 84 L38 94 L33 78 L18 84 L20 68 L4 66 L14 54 L2 44 L16 37 L10 22 L26 24 L28 8 L42 16 Z' fill='#ff5c8a'/></svg>"
+    },
+    {
+      "id": "seal",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 4 l10 8 12 -5 6 12 13 3 -2 13 10 9 -8 10 4 13 -13 2 -6 12 -12 -5 -12 5 -6 -12 -13 -2 4 -13 -8 -10 10 -9 -2 -13 13 -3 6 -12 12 5 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "shield",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 4 L90 18 V50 C 90 76 72 92 50 98 C 28 92 10 76 10 50 V18 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "ribbon",
+      "cat": "badges",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='38' r='30' fill='#ffd23f'/><path d='M32 60 L22 96 L40 84 L50 98 L60 84 L78 96 L68 60 Z' fill='#ff5c8a'/></svg>"
+    },
+    {
+      "id": "speech-round",
+      "cat": "speech",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M12 12 H88 A8 8 0 0 1 96 20 V60 A8 8 0 0 1 88 68 H40 L22 88 V68 H12 A8 8 0 0 1 4 60 V20 A8 8 0 0 1 12 12 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "speech-square",
+      "cat": "speech",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M6 10 H94 V64 H36 L20 84 V64 H6 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "thought",
+      "cat": "speech",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><ellipse cx='52' cy='38' rx='42' ry='30' fill='#7c5cff'/><circle cx='30' cy='78' r='8' fill='#7c5cff'/><circle cx='18' cy='92' r='5' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "tag",
+      "cat": "speech",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M6 50 L44 12 H94 V62 L56 100 Z' fill='#7c5cff'/><circle cx='74' cy='30' r='8' fill='#fff'/></svg>"
+    },
+    {
+      "id": "frame-square",
+      "cat": "frames",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='6' y='6' width='88' height='88' fill='none' stroke='#1b1830' stroke-width='5'/></svg>"
+    },
+    {
+      "id": "frame-round",
+      "cat": "frames",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='6' y='6' width='88' height='88' rx='16' fill='none' stroke='#1b1830' stroke-width='5'/></svg>"
+    },
+    {
+      "id": "frame-dashed",
+      "cat": "frames",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='6' y='6' width='88' height='88' rx='6' fill='none' stroke='#1b1830' stroke-width='4' stroke-dasharray='12 8'/></svg>"
+    },
+    {
+      "id": "frame-corners",
+      "cat": "frames",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M6 26 V6 H26 M74 6 H94 V26 M94 74 V94 H74 M26 94 H6 V74' fill='none' stroke='#1b1830' stroke-width='5' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "frame-double",
+      "cat": "frames",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='4' y='4' width='92' height='92' fill='none' stroke='#1b1830' stroke-width='3'/><rect x='12' y='12' width='76' height='76' fill='none' stroke='#1b1830' stroke-width='2'/></svg>"
+    },
+    {
+      "id": "wave",
+      "cat": "decor",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30'><path d='M0 15 q 12 -14 25 0 t 25 0 t 25 0 t 25 0 V30 H0 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "dots-row",
+      "cat": "decor",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 16'><g fill='#7c5cff'><circle cx='8' cy='8' r='5'/><circle cx='30' cy='8' r='5'/><circle cx='52' cy='8' r='5'/><circle cx='74' cy='8' r='5'/><circle cx='96' cy='8' r='4'/></g></svg>"
+    },
+    {
+      "id": "sparkle",
+      "cat": "decor",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6 C 54 34 66 46 94 50 C 66 54 54 66 50 94 C 46 66 34 54 6 50 C 34 46 46 34 50 6 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "quote",
+      "cat": "decor",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M14 62 C 14 34 30 18 46 16 V32 C 36 34 30 42 30 50 H44 V80 H14 Z M56 62 C 56 34 72 18 88 16 V32 C 78 34 72 42 72 50 H86 V80 H56 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "swoosh",
+      "cat": "decor",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30'><path d='M4 20 C 26 4 74 4 96 22' fill='none' stroke='#ff5c8a' stroke-width='7' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "sun",
+      "cat": "decor",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g stroke='#ffd23f' stroke-width='7' stroke-linecap='round'><line x1='50' y1='6' x2='50' y2='20'/><line x1='50' y1='80' x2='50' y2='94'/><line x1='6' y1='50' x2='20' y2='50'/><line x1='80' y1='50' x2='94' y2='50'/><line x1='18' y1='18' x2='28' y2='28'/><line x1='72' y1='72' x2='82' y2='82'/><line x1='82' y1='18' x2='72' y2='28'/><line x1='28' y1='72' x2='18' y2='82'/></g><circle cx='50' cy='50' r='20' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "icon-check",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M15 55 L38 78 L44 78 L88 25 L76 15 L40 60 L26 44 Z' fill='#22a06b'/></svg>"
+    },
+    {
+      "id": "icon-close",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 12 L50 42 L80 12 L88 20 L58 50 L88 80 L80 88 L50 58 L20 88 L12 80 L42 50 L12 20 Z' fill='#e5484d'/></svg>"
+    },
+    {
+      "id": "icon-mail",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='8' y='22' width='84' height='60' rx='8' fill='#7c5cff'/><path d='M12 28 L50 58 L88 28' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+    },
+    {
+      "id": "icon-phone",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 8 C22 8 16 14 17 22 C20 48 32 70 54 84 C60 88 66 87 70 82 L80 68 C83 63 82 57 77 54 L62 44 C58 41 53 42 50 46 L45 53 C36 45 30 35 27 23 L34 18 C38 15 39 9 35 6 Z' fill='#22a06b'/></svg>"
+    },
+    {
+      "id": "icon-location",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6 C30 6 15 21 15 41 C15 66 50 95 50 95 C50 95 85 66 85 41 C85 21 70 6 50 6 Z' fill='#ff5c8a'/><circle cx='50' cy='40' r='14' fill='#ffffff'/></svg>"
+    },
+    {
+      "id": "icon-clock",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='#4cc9f0' stroke-width='8'/><line x1='50' y1='50' x2='50' y2='26' stroke='#4cc9f0' stroke-width='7' stroke-linecap='round'/><line x1='50' y1='50' x2='70' y2='58' stroke='#4cc9f0' stroke-width='7' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "icon-cart",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M8 10 H22 L34 62 H82 L92 26 H30' fill='none' stroke='#7c5cff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/><circle cx='40' cy='84' r='9' fill='#7c5cff'/><circle cx='76' cy='84' r='9' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "icon-user",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='32' r='20' fill='#1b1830'/><path d='M14 92 C14 66 30 56 50 56 C70 56 86 66 86 92 Z' fill='#1b1830'/></svg>"
+    },
+    {
+      "id": "icon-calendar",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='18' width='80' height='72' rx='8' fill='#ff8f3f'/><rect x='10' y='18' width='80' height='22' rx='8' fill='#c9541a'/><rect x='26' y='6' width='10' height='20' rx='4' fill='#ff8f3f'/><rect x='64' y='6' width='10' height='20' rx='4' fill='#ff8f3f'/></svg>"
+    },
+    {
+      "id": "icon-bell",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 8 C40 8 34 16 34 26 C34 46 22 54 22 66 H78 C78 54 66 46 66 26 C66 16 60 8 50 8 Z' fill='#ffd23f'/><path d='M40 72 C40 80 44 86 50 86 C56 86 60 80 60 72 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "icon-thumbsup",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='46' width='18' height='44' fill='#4cc9f0'/><path d='M34 46 L46 10 C50 10 56 14 56 22 L52 42 H84 C90 42 94 48 92 54 L82 84 C80 88 76 90 72 90 H34 Z' fill='#4cc9f0'/></svg>"
+    },
+    {
+      "id": "icon-play",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='#7c5cff'/><path d='M40 32 L72 50 L40 68 Z' fill='#ffffff'/></svg>"
+    },
+    {
+      "id": "icon-search",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='42' cy='42' r='28' fill='none' stroke='#1b1830' stroke-width='9'/><line x1='63' y1='63' x2='90' y2='90' stroke='#1b1830' stroke-width='10' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "icon-gear",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='#6c6883'><rect x='44' y='2' width='12' height='22' rx='3'/><rect x='44' y='76' width='12' height='22' rx='3'/><rect x='2' y='44' width='22' height='12' rx='3'/><rect x='76' y='44' width='22' height='12' rx='3'/><rect x='44' y='2' width='12' height='22' rx='3' transform='rotate(45 50 50)'/><rect x='44' y='76' width='12' height='22' rx='3' transform='rotate(45 50 50)'/><rect x='2' y='44' width='22' height='12' rx='3' transform='rotate(45 50 50)'/><rect x='76' y='44' width='22' height='12' rx='3' transform='rotate(45 50 50)'/></g><circle cx='50' cy='50' r='28' fill='none' stroke='#6c6883' stroke-width='11'/></svg>"
+    },
+    {
+      "id": "icon-flag",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 6 V94' stroke='#e5484d' stroke-width='7' stroke-linecap='round' fill='none'/><path d='M20 10 H80 L68 28 L80 46 H20 Z' fill='#e5484d'/></svg>"
+    },
+    {
+      "id": "icon-music",
+      "cat": "icons",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='26' cy='78' r='14' fill='#7c5cff'/><circle cx='68' cy='68' r='14' fill='#7c5cff'/><path d='M40 78 V22 L82 12 V58' stroke='#7c5cff' stroke-width='8' fill='none' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "social-heart",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 90 C50 90 10 62 10 34 C10 16 24 6 40 6 C48 6 50 14 50 20 C50 14 52 6 60 6 C76 6 90 16 90 34 C90 62 50 90 50 90 Z' fill='#ff5c8a'/></svg>"
+    },
+    {
+      "id": "social-comment",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 22 C10 15 16 10 24 10 H76 C84 10 90 15 90 22 V58 C90 65 84 70 76 70 H38 L16 90 L20 70 H24 C16 70 10 65 10 58 Z' fill='#4cc9f0'/><circle cx='32' cy='40' r='5' fill='#fff'/><circle cx='50' cy='40' r='5' fill='#fff'/><circle cx='68' cy='40' r='5' fill='#fff'/></svg>"
+    },
+    {
+      "id": "social-share",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='76' cy='20' r='13' fill='#7c5cff'/><circle cx='22' cy='50' r='13' fill='#7c5cff'/><circle cx='76' cy='80' r='13' fill='#7c5cff'/><path d='M32 43 L66 24 M32 57 L66 76' stroke='#7c5cff' stroke-width='7' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "social-hashtag",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M38 6 L26 94 M74 6 L62 94 M8 36 H92 M6 66 H90' stroke='#1b1830' stroke-width='9' stroke-linecap='round' fill='none'/></svg>"
+    },
+    {
+      "id": "social-at",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='54' r='20' fill='none' stroke='#7c5cff' stroke-width='9'/><path d='M70 54 V62 C70 70 76 74 82 70 C90 65 92 54 92 50 C92 26 74 8 50 8 C26 8 8 26 8 50 C8 74 26 92 50 92 C60 92 68 89 75 84' fill='none' stroke='#7c5cff' stroke-width='9' stroke-linecap='round'/></svg>"
+    },
+    {
+      "id": "social-megaphone",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 42 V58 H24 L70 82 V18 L24 42 Z' fill='#ffd23f'/><path d='M70 18 L92 8 V92 L70 82 Z' fill='#ffd23f'/><path d='M28 60 L34 88 C34 92 38 94 42 92 C46 90 48 86 46 82 L40 60 Z' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "social-camera",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='8' y='28' width='84' height='58' rx='10' fill='#1b1830'/><path d='M34 28 L42 14 H58 L66 28 Z' fill='#1b1830'/><circle cx='50' cy='58' r='20' fill='#fff'/><circle cx='50' cy='58' r='13' fill='#1b1830'/><circle cx='78' cy='40' r='4' fill='#fff'/></svg>"
+    },
+    {
+      "id": "social-verified",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 4 l9 8 12 -3 5 11 12 4 -3 12 8 9 -8 9 3 12 -12 4 -5 11 -12 -3 -9 8 -9 -8 -12 3 -5 -11 -12 -4 3 -12 -8 -9 8 -9 -3 -12 12 -4 5 -11 12 3 Z' fill='#4cc9f0'/><path d='M32 50 L44 62 L70 36' fill='none' stroke='#fff' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+    },
+    {
+      "id": "social-bookmark",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 6 H80 V94 L50 74 L20 94 Z' fill='#7c5cff'/></svg>"
+    },
+    {
+      "id": "social-repost",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M22 34 H64 V50 L88 28 L64 6 V22 H14 V54 H22 Z' fill='#22a06b'/><path d='M78 66 H36 V50 L12 72 L36 94 V78 H86 V46 H78 Z' fill='#22a06b'/></svg>"
+    },
+    {
+      "id": "social-send",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M6 46 L92 8 L60 92 L46 58 L6 46 Z' fill='#7c5cff'/><path d='M46 58 L92 8 L38 66 Z' fill='#5b3df5'/></svg>"
+    },
+    {
+      "id": "social-link",
+      "cat": "social",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='6' y='36' width='46' height='28' rx='14' fill='none' stroke='#1b1830' stroke-width='9' transform='rotate(-40 29 50)'/><rect x='48' y='36' width='46' height='28' rx='14' fill='none' stroke='#1b1830' stroke-width='9' transform='rotate(-40 71 50)'/></svg>"
+    },
+    {
+      "id": "sticker-fire",
+      "cat": "stickers",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 4 C36 22 26 34 26 52 C26 70 36 82 50 82 C64 82 74 70 74 54 C74 62 68 68 62 68 C66 58 62 48 54 40 C56 50 52 56 46 56 C40 56 38 50 40 44 C30 54 28 66 34 76 C20 70 14 58 14 48 C14 30 30 16 50 4 Z' fill='#ff8f3f'/></svg>"
+    },
+    {
+      "id": "sticker-crown",
+      "cat": "stickers",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M10 40 L28 56 L50 22 L72 56 L90 40 L84 78 H16 Z' fill='#ffd23f'/><rect x='16' y='80' width='68' height='10' fill='#ffd23f'/><circle cx='10' cy='36' r='7' fill='#ffd23f'/><circle cx='50' cy='18' r='7' fill='#ffd23f'/><circle cx='90' cy='36' r='7' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "sticker-gift",
+      "cat": "stickers",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='40' width='76' height='50' fill='#ff5c8a'/><rect x='6' y='26' width='88' height='18' fill='#ff2f6e'/><rect x='44' y='26' width='12' height='64' fill='#ffd23f'/><path d='M50 26 C34 26 30 10 42 8 C50 6 50 20 50 26 Z' fill='#ff5c8a'/><path d='M50 26 C66 26 70 10 58 8 C50 6 50 20 50 26 Z' fill='#ff5c8a'/></svg>"
+    },
+    {
+      "id": "sticker-confetti",
+      "cat": "stickers",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='20' cy='24' r='6' fill='#7c5cff'/><circle cx='50' cy='10' r='5' fill='#ff5c8a'/><circle cx='82' cy='22' r='6' fill='#4cc9f0'/><rect x='12' y='50' width='10' height='10' fill='#ffd23f' transform='rotate(20 17 55)'/><rect x='78' y='50' width='10' height='10' fill='#22a06b' transform='rotate(-20 83 55)'/><circle cx='50' cy='60' r='7' fill='#ff8f3f'/><rect x='40' y='78' width='10' height='10' fill='#7c5cff' transform='rotate(15 45 83)'/><circle cx='70' cy='84' r='6' fill='#ff5c8a'/><circle cx='20' cy='84' r='5' fill='#4cc9f0'/></svg>"
+    },
+    {
+      "id": "sticker-trophy",
+      "cat": "stickers",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 10 H70 V38 C70 54 58 64 50 64 C42 64 30 54 30 38 Z' fill='#ffd23f'/><path d='M30 16 H14 C14 34 22 42 30 42' fill='none' stroke='#ffd23f' stroke-width='7'/><path d='M70 16 H86 C86 34 78 42 70 42' fill='none' stroke='#ffd23f' stroke-width='7'/><rect x='44' y='64' width='12' height='16' fill='#ffd23f'/><rect x='30' y='82' width='40' height='10' rx='3' fill='#ffd23f'/></svg>"
+    },
+    {
+      "id": "sticker-percent",
+      "cat": "stickers",
+      "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='#22a06b'/><circle cx='34' cy='34' r='10' fill='#fff'/><circle cx='66' cy='66' r='10' fill='#fff'/><path d='M30 70 L70 30' stroke='#fff' stroke-width='8' stroke-linecap='round'/></svg>"
+    }
+  ]
+}

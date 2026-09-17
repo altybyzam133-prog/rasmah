@@ -1,0 +1,61 @@
+<%- include('partials/head', { pageTitle: null }) %>
+<%- include('partials/header') %>
+
+<section class="hero wrap">
+  <div class="hero-text">
+    <p class="eyebrow"><%= t('brand_tagline') %></p>
+    <h1><%= t('home_hero_title') %></h1>
+    <p class="lede"><%= t('home_hero_sub') %></p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="<%= user ? '/dashboard' : '/register' %>"><%= t('home_hero_cta') %></a>
+      <a class="btn btn-ghost btn-lg" href="/templates"><%= t('home_hero_cta2') %></a>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-card c1"><span>Aa</span></div>
+    <div class="hero-card c2"></div>
+    <div class="hero-card c3"><span>✦</span></div>
+    <div class="hero-blob"></div>
+  </div>
+</section>
+
+<section class="features wrap">
+  <h2><%= t('home_feat_title') %></h2>
+  <div class="feature-grid">
+    <% const feats = [1,2,3,4]; feats.forEach(function(n){ %>
+      <article class="feature">
+        <div class="feature-ic ic<%= n %>"></div>
+        <h3><%= t('home_feat_' + n + '_t') %></h3>
+        <p class="muted"><%= t('home_feat_' + n + '_d') %></p>
+      </article>
+    <% }); %>
+  </div>
+</section>
+
+<% if (templates && templates.length) { %>
+<section class="tpl-strip wrap">
+  <div class="section-head">
+    <h2><%= t('home_templates_title') %></h2>
+    <a class="link" href="/templates"><%= t('home_templates_cta') %> →</a>
+  </div>
+  <div class="tpl-row">
+    <% templates.forEach(function(tpl){ %>
+      <a class="tpl-mini" href="<%= user ? '/use-template/' + tpl.id : '/register?next=' + encodeURIComponent('/use-template/' + tpl.id) %>"
+         style="aspect-ratio: <%= tpl.width %> / <%= tpl.height %>">
+        <% if (tpl.thumbnail) { %><img src="<%= tpl.thumbnail %>" alt="<%= field(tpl,'name') %>" loading="lazy"><% } %>
+        <span class="tpl-mini-name"><%= field(tpl, 'name') %></span>
+      </a>
+    <% }); %>
+  </div>
+</section>
+<% } %>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2><%= t('home_cta_title') %></h2>
+    <p><%= t('home_cta_sub') %></p>
+    <a class="btn btn-primary btn-lg" href="<%= user ? '/dashboard' : '/register' %>"><%= t('home_hero_cta') %></a>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,41 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+
+<section class="wrap tpl-page">
+  <div class="tpl-head">
+    <h1><%= t('community_title') %></h1>
+    <p class="muted"><%= t('community_sub') %></p>
+  </div>
+
+  <% if (!items.length) { %>
+    <p class="empty-line muted"><%= t('community_empty') %></p>
+  <% } else { %>
+    <div class="tpl-grid">
+      <% items.forEach(function(it){ %>
+        <% const mine = user && it.user_id === user.id; %>
+        <article class="tpl-card">
+          <div class="tpl-card-thumb" style="aspect-ratio: <%= it.width %> / <%= it.height %>">
+            <% if (it.thumbnail) { %><img src="<%= it.thumbnail %>" alt="" loading="lazy"><% } %>
+          </div>
+          <div class="tpl-card-body">
+            <span class="tpl-card-name"><%= it.title || t('common_untitled') %></span>
+            <span class="tpl-card-dim muted"><%= it.width %>×<%= it.height %></span>
+          </div>
+          <p class="tpl-card-author muted"><%= t('community_by', { name: it.author_name }) %></p>
+          <% if (mine) { %>
+            <button type="button" class="btn btn-ghost btn-sm tpl-card-use" data-act="remove-publish" data-id="<%= it.id %>">
+              <%= t('community_remove') %>
+            </button>
+          <% } else { %>
+            <a class="btn btn-primary btn-sm tpl-card-use" href="/use-community/<%= it.id %>">
+              <%= t('tpl_use') %>
+            </a>
+          <% } %>
+        </article>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>
+<script src="/static/js/community.js" defer></script>

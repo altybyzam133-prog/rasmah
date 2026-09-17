@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= dir %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title>Admin — <%= brandName %></title>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1>Admin</h1>
+    <% if (error) { %><p class="form-error"><%= error %></p><% } %>
+    <form method="post" action="/admin/login" class="form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="field"><span><%= t('auth_password') %></span>
+        <input type="password" name="password" required autofocus></label>
+      <button class="btn btn-primary btn-block"><%= t('auth_login_btn') %></button>
+    </form>
+  </div>
+</section>
+</body>
+</html>

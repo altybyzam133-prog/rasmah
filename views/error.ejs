@@ -1,0 +1,8 @@
+<%- include('partials/head', { pageTitle: 'Error', noindex: true }) %>
+<%- include('partials/header') %>
+<section class="wrap state-page">
+  <h1>⚠</h1>
+  <p class="err-msg"><%= message %></p>
+  <a class="btn btn-primary" href="/"><%= t('err_home') %></a>
+</section>
+<%- include('partials/footer') %>

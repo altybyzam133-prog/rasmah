@@ -1,0 +1,18 @@
+node_modules/
+.env
+data/*.db
+data/*.db-*
+public/uploads/*
+!public/uploads/.gitkeep
+public/vendor/*
+!public/vendor/.gitkeep
+public/fonts/*.woff2
+public/fonts/*.ttf
+*.log
+logs/
+
+# personal-deployment scripts (hardcode this machine's local path + this
+# user's live public URL — not something a fresh clone needs; see README for
+# generic run instructions instead)
+scripts/keepalive-*.ps1
+scripts/README-autostart.md

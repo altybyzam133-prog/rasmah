@@ -1,0 +1,30 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1><%= t('auth_register_title') %></h1>
+    <% if (error) { %><p class="form-error"><%= error %></p><% } %>
+    <form method="post" action="/register" class="form">
+      <%- include('partials/csrf') %>
+      <input type="hidden" name="next" value="<%= next %>">
+      <label class="field">
+        <span><%= t('auth_name') %></span>
+        <input type="text" name="name" value="<%= values.name || '' %>" required maxlength="60" autocomplete="name" autofocus>
+      </label>
+      <label class="field">
+        <span><%= t('auth_email') %></span>
+        <input type="email" name="email" value="<%= values.email || '' %>" required autocomplete="email">
+      </label>
+      <label class="field">
+        <span><%= t('auth_password') %></span>
+        <input type="password" name="password" required minlength="8" autocomplete="new-password">
+        <small class="muted"><%= t('auth_password_hint') %></small>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block"><%= t('auth_register_btn') %></button>
+    </form>
+    <p class="auth-alt"><a href="/login<%= next ? '?next=' + encodeURIComponent(next) : '' %>"><%= t('auth_to_login') %></a></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
