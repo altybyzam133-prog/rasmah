@@ -5,15 +5,32 @@ const crypto = require('crypto');
 const {
   createUser, verifyUser, setUserLang,
   getUserByEmail, setResetCode, verifyResetCode, clearResetCode, setUserPassword,
+  setEmailVerifyCode, verifyEmailCode, markEmailVerified,
 } = require('../lib/db');
 const { sendMail } = require('../lib/mailer');
-const { loginLimiter, registerLimiter, forgotPasswordLimiter, resetPasswordLimiter } = require('../lib/rate-limit');
+const { requireSession } = require('../lib/auth');
+const {
+  loginLimiter, registerLimiter, forgotPasswordLimiter, resetPasswordLimiter, verifyEmailLimiter,
+} = require('../lib/rate-limit');
 
 const router = express.Router();
 
 function cleanNext(n) {
   n = String(n || '');
   return n.startsWith('/') && !n.startsWith('//') ? n : '/dashboard';
+}
+
+function sixDigitCode() {
+  return String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+}
+function sendVerifyMail(res, user) {
+  const code = sixDigitCode();
+  setEmailVerifyCode(user.id, code);
+  sendMail({
+    to: user.email,
+    subject: res.locals.t('mail_verify_subject'),
+    text: res.locals.t('mail_verify_body', { code }),
+  });
 }
 
 router.post('/register', registerLimiter, (req, res) => {
@@ -27,7 +44,9 @@ router.post('/register', registerLimiter, (req, res) => {
     });
     if (['ar', 'en'].includes(res.locals.lang)) setUserLang(user.id, res.locals.lang);
     req.session.userId = user.id;
-    return res.redirect(next);
+    req.session.postVerifyNext = next;
+    sendVerifyMail(res, user);
+    return res.redirect('/verify-email');
   } catch (err) {
     const map = {
       BAD_NAME: 'auth_err_bad_name',
@@ -58,6 +77,10 @@ router.post('/login', loginLimiter, (req, res) => {
     });
   }
   req.session.userId = user.id;
+  // requireUser bounces an unverified user to /verify-email regardless of
+  // `next` — stash it so a successful verification can still land them
+  // where they were originally headed instead of always /dashboard.
+  if (!user.email_verified) req.session.postVerifyNext = next;
   return res.redirect(next);
 });
 
@@ -65,6 +88,40 @@ router.post('/logout', (req, res) => {
   req.session.userId = null;
   req.session.flash = { type: 'ok', msg: res.locals.t('auth_logged_out') };
   res.redirect('/');
+});
+
+router.get('/verify-email', requireSession, (req, res) => {
+  if (res.locals.user.email_verified) return res.redirect('/dashboard');
+  res.render('verify-email', {
+    pageTitle: res.locals.t('auth_verify_title'),
+    email: res.locals.user.email,
+    error: null,
+  });
+});
+
+router.post('/verify-email', requireSession, (req, res) => {
+  if (res.locals.user.email_verified) return res.redirect('/dashboard');
+  const code = String(req.body.code || '').trim();
+  if (!verifyEmailCode(res.locals.user.id, code)) {
+    res.status(400);
+    return res.render('verify-email', {
+      pageTitle: res.locals.t('auth_verify_title'),
+      email: res.locals.user.email,
+      error: res.locals.t('auth_err_bad_code'),
+    });
+  }
+  markEmailVerified(res.locals.user.id);
+  const dest = cleanNext(req.session.postVerifyNext);
+  delete req.session.postVerifyNext;
+  req.session.flash = { type: 'ok', msg: res.locals.t('auth_verify_done') };
+  res.redirect(dest);
+});
+
+router.post('/verify-email/resend', verifyEmailLimiter, requireSession, (req, res) => {
+  if (res.locals.user.email_verified) return res.redirect('/dashboard');
+  sendVerifyMail(res, res.locals.user);
+  req.session.flash = { type: 'ok', msg: res.locals.t('auth_verify_resent') };
+  res.redirect('/verify-email');
 });
 
 function renderForgot(req, res, extra = {}) {

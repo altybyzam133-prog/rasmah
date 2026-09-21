@@ -61,6 +61,7 @@ function req(method, url, { body, headers = {}, json } = {}) {
   });
 }
 const csrfFrom = (html) => (html.match(/csrf-token" content="([^"]+)"/) || [])[1];
+const form = (obj) => Object.entries(obj).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
 
 async function waitForServer(tries = 50) {
   for (let i = 0; i < tries; i++) {
@@ -83,6 +84,40 @@ async function waitForServer(tries = 50) {
   let srvOut = '';
   srv.stderr.on('data', (d) => (srvErr += d));
   srv.stdout.on('data', (d) => (srvOut += d));
+
+  // ---- email-verification helpers (registration now requires confirming a
+  // mailed 6-digit code before requireUser-gated routes are reachable) ----
+  function extractCode(markStart) {
+    const mailChunk = srvOut.slice(markStart);
+    return (mailChunk.match(/:\s*(\d{6})(?!\d)/) || [])[1];
+  }
+  async function submitVerifyCode(csrfToken, code) {
+    return req('POST', BASE + '/verify-email', {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form({ _csrf: csrfToken, code }),
+    });
+  }
+  // Registers, waits for the mailed code, and submits it — used for the 2nd/
+  // 3rd throwaway smoke users where the verification flow itself isn't what's
+  // under test (cross-user isolation is). Returns the final post-verify
+  // response so the caller can assert on its redirect.
+  async function registerAndVerify({ name, email, password }) {
+    let rr = await req('GET', BASE + '/register');
+    const rCsrf = csrfFrom(rr.body);
+    const mark = srvOut.length;
+    rr = await req('POST', BASE + '/register', {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form({ _csrf: rCsrf, name, email, password, next: '/dashboard' }),
+    });
+    assert(rr.status === 302 && /\/verify-email/.test(rr.headers.location || ''), `${name} registers -> 302 verify-email`);
+    await new Promise((res) => setTimeout(res, 150));
+    const code = extractCode(mark);
+    rr = await req('GET', BASE + '/verify-email');
+    const vCsrf = csrfFrom(rr.body);
+    rr = await submitVerifyCode(vCsrf, code);
+    assert(rr.status === 302 && /\/dashboard/.test(rr.headers.location || ''), `${name} verifies their email -> 302 dashboard`);
+    return rr;
+  }
 
   try {
     assert(await waitForServer(), 'server boots and answers');
@@ -148,13 +183,42 @@ async function waitForServer(tries = 50) {
     assert(r.status === 403, 'POST /register with bad csrf -> 403');
 
     // ---- register ----
-    const form = (obj) => Object.entries(obj).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
     const smokeEmail = `smoke${Date.now()}@test.dev`;
+    const outMarkReg = srvOut.length;
     r = await req('POST', BASE + '/register', {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: form({ _csrf: regCsrf, name: 'Smoke User', email: smokeEmail, password: 'smoke-pass-123', next: '/dashboard' }),
     });
-    assert(r.status === 302 && /\/dashboard/.test(r.headers.location || ''), 'POST /register -> 302 dashboard');
+    assert(r.status === 302 && /\/verify-email/.test(r.headers.location || ''), 'POST /register -> 302 verify-email (unverified accounts must confirm their email first)');
+
+    r = await req('GET', BASE + '/dashboard');
+    assert(r.status === 302 && /\/verify-email/.test(r.headers.location || ''), 'GET /dashboard before verifying email -> 302 verify-email (requireUser gates unverified accounts)');
+
+    await new Promise((res) => setTimeout(res, 150));
+    const regCode = extractCode(outMarkReg);
+    assert(!!regCode, 'a 6-digit email-verification code was captured from the registration mail');
+
+    r = await req('GET', BASE + '/verify-email');
+    assert(r.status === 200 && /name="code"/.test(r.body), 'GET /verify-email 200 with a code field');
+    let verifyCsrf = csrfFrom(r.body);
+
+    r = await submitVerifyCode(verifyCsrf, '000000');
+    assert(r.status === 400, 'POST /verify-email with a wrong code -> 400');
+
+    const outMarkResend = srvOut.length;
+    r = await req('POST', BASE + '/verify-email/resend', {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form({ _csrf: verifyCsrf }),
+    });
+    assert(r.status === 302 && /\/verify-email/.test(r.headers.location || ''), 'POST /verify-email/resend -> 302 back to verify-email');
+    await new Promise((res) => setTimeout(res, 150));
+    const resentCode = extractCode(outMarkResend);
+    assert(!!resentCode, 'resend logged a fresh 6-digit code');
+
+    r = await req('GET', BASE + '/verify-email');
+    verifyCsrf = csrfFrom(r.body);
+    r = await submitVerifyCode(verifyCsrf, resentCode);
+    assert(r.status === 302 && /\/dashboard/.test(r.headers.location || ''), 'POST /verify-email with the resent code -> 302 dashboard (postVerifyNext honored)');
 
     r = await req('GET', BASE + '/dashboard');
     const dashCsrf = csrfFrom(r.body);
@@ -222,6 +286,34 @@ async function waitForServer(tries = 50) {
       body: form({ _csrf: dashCsrf, email: smokeEmail, password: 'new-pass-1234', next: '/dashboard' }),
     });
     assert(r.status === 302 && /\/dashboard/.test(r.headers.location || ''), 'new password works after a reset');
+
+    // ---- account profile: changing your email re-arms verification, so
+    // "verify once with a real address, then swap to a fake one" doesn't work ----
+    r = await req('GET', BASE + '/account');
+    assert(r.status === 200, 'GET /account 200 for a verified user');
+
+    const newEmail = `smoke-new-${Date.now()}@test.dev`;
+    const outMarkEmailChange = srvOut.length;
+    r = await req('POST', BASE + '/account/profile', {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form({ _csrf: dashCsrf, name: 'Smoke User', email: newEmail }),
+    });
+    assert(r.status === 302 && /\/verify-email/.test(r.headers.location || ''), 'POST /account/profile with a changed email -> 302 verify-email');
+
+    r = await req('GET', BASE + '/dashboard');
+    assert(r.status === 302 && /\/verify-email/.test(r.headers.location || ''), 'changing email re-locks requireUser-gated pages until re-verified');
+
+    await new Promise((res) => setTimeout(res, 150));
+    const emailChangeCode = extractCode(outMarkEmailChange);
+    assert(!!emailChangeCode, 'changing email sent a fresh verification code to the new address');
+
+    r = await req('GET', BASE + '/verify-email');
+    const emailChangeVerifyCsrf = csrfFrom(r.body);
+    r = await submitVerifyCode(emailChangeVerifyCsrf, emailChangeCode);
+    assert(r.status === 302 && /\/account/.test(r.headers.location || ''), 'verifying the new email -> 302 back to /account (postVerifyNext honored)');
+
+    r = await req('GET', BASE + '/dashboard');
+    assert(r.status === 200, 'dashboard reachable again after re-verifying the changed email');
 
     // ---- designs API ----
     r = await req('POST', BASE + '/api/designs', { headers: { 'x-csrf-token': dashCsrf }, json: { width: 1080, height: 1350 } });
@@ -362,13 +454,7 @@ async function waitForServer(tries = 50) {
     // Swap the session cookie out for a fresh registration, then swap it back.
     const savedDsid = jar.dsid;
     delete jar.dsid;
-    r = await req('GET', BASE + '/register');
-    const reg2Csrf = csrfFrom(r.body);
-    r = await req('POST', BASE + '/register', {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: form({ _csrf: reg2Csrf, name: 'Smoke User 2', email: `smoke2${Date.now()}@test.dev`, password: 'smoke-pass-456', next: '/dashboard' }),
-    });
-    assert(r.status === 302, 'second smoke user registers into a separate session');
+    await registerAndVerify({ name: 'Smoke User 2', email: `smoke2${Date.now()}@test.dev`, password: 'smoke-pass-456' });
     r = await req('GET', BASE + '/dashboard');
     const user2Csrf = csrfFrom(r.body);
 
@@ -537,13 +623,7 @@ async function waitForServer(tries = 50) {
     // isolation test above established
     const savedDsid3 = jar.dsid;
     delete jar.dsid;
-    r = await req('GET', BASE + '/register');
-    const reg3Csrf = csrfFrom(r.body);
-    r = await req('POST', BASE + '/register', {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: form({ _csrf: reg3Csrf, name: 'Smoke User 3', email: `smoke3${Date.now()}@test.dev`, password: 'smoke-pass-789', next: '/dashboard' }),
-    });
-    assert(r.status === 302, 'third smoke user registers into a separate session');
+    await registerAndVerify({ name: 'Smoke User 3', email: `smoke3${Date.now()}@test.dev`, password: 'smoke-pass-789' });
     r = await req('GET', BASE + '/dashboard');
     const user3Csrf = csrfFrom(r.body);
 

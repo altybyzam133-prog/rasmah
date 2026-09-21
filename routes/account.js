@@ -1,7 +1,9 @@
 'use strict';
 
 const express = require('express');
-const { db, updateProfile, setUserPassword, setUserLang, verifyUserById, deleteUser } = require('../lib/db');
+const crypto = require('crypto');
+const { db, updateProfile, setUserPassword, setUserLang, verifyUserById, deleteUser, setEmailVerifyCode } = require('../lib/db');
+const { sendMail } = require('../lib/mailer');
 const { requireUser } = require('../lib/auth');
 
 const router = express.Router();
@@ -28,8 +30,24 @@ router.get('/', (req, res) => render(req, res));
 
 router.post('/profile', (req, res) => {
   try {
+    const prevEmailLower = res.locals.user.email_lower;
     const u = updateProfile(res.locals.user.id, { name: req.body.name, email: req.body.email });
     res.locals.user = u;
+    if (u.email_lower !== prevEmailLower) {
+      // updateProfile already reset email_verified to 0 for us — send a
+      // fresh code for the new address so requireUser's verify gate (which
+      // now applies again) has something to check against.
+      const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+      setEmailVerifyCode(u.id, code);
+      sendMail({
+        to: u.email,
+        subject: res.locals.t('mail_verify_subject'),
+        text: res.locals.t('mail_verify_body', { code }),
+      });
+      req.session.postVerifyNext = '/account';
+      req.session.flash = { type: 'ok', msg: res.locals.t('acc_email_changed_verify') };
+      return res.redirect('/verify-email');
+    }
     render(req, res, { ok: res.locals.t('acc_saved') });
   } catch (err) {
     const map = { BAD_NAME: 'auth_err_bad_name', BAD_EMAIL: 'auth_err_bad_email', EMAIL_TAKEN: 'auth_err_email_taken' };

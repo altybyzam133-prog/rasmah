@@ -336,6 +336,8 @@ button { font-family: inherit; }
 .auth-card h1 { font-size: 1.5rem; margin-bottom: 1em; }
 .auth-alt { margin: 16px 0 0; text-align: center; font-size: .9rem; }
 .auth-alt a { color: var(--primary); font-weight: 600; }
+.link-btn { background: none; border: none; padding: 0; font: inherit; color: var(--primary); font-weight: 600; cursor: pointer; }
+.link-btn:hover { text-decoration: underline; }
 .auth-forgot { margin: -6px 0 0; text-align: end; font-size: .82rem; }
 .auth-forgot a { color: var(--muted); }
 .auth-forgot a:hover { color: var(--primary); }
@@ -697,7 +699,6 @@ button { font-family: inherit; }
 @media (max-width: 620px) {
   .site-nav { display: none; }
   .feature-grid { grid-template-columns: 1fr; }
-  .nav-right > a.btn-ghost { display: none; } /* hide "log in" link, keep log-out button */
   .section-head { flex-direction: column; align-items: stretch; }
   .lang-switch-text { display: none; } /* keep the globe icon only, save row space */
   .nav-right { gap: 6px; }

@@ -104,6 +104,17 @@
   "mail_reset_body": "Your password reset code: {code}\nValid for {minutes} minutes. If you didn't request this, just ignore this email.",
   "rate_limited": "Too many attempts — please wait a bit and try again",
 
+  "auth_verify_title": "Verify your email",
+  "auth_verify_hint": "Enter the 6-digit code we sent to {email}. You need to verify your email before you can use your account.",
+  "auth_verify_code": "Verification code",
+  "auth_verify_btn": "Verify email",
+  "auth_verify_resent": "A new code has been sent",
+  "auth_verify_done": "Your email is verified — welcome!",
+  "auth_verify_wrong_email": "Signed up with the wrong email? Log out and register again",
+  "mail_verify_subject": "Your email verification code",
+  "mail_verify_body": "Your email verification code: {code}\nValid for 24 hours. You need to enter this code before you can use your account.",
+  "acc_email_changed_verify": "Your email was changed — verify it before you can keep using your account",
+
   "dash_title": "My designs",
   "dash_new": "New design",
   "dash_empty_title": "No designs yet",

@@ -1,0 +1,31 @@
+<%- include('partials/head', { pageTitle: pageTitle }) %>
+<%- include('partials/header') %>
+
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1><%= t('auth_verify_title') %></h1>
+    <p class="muted auth-hint"><%= t('auth_verify_hint', { email }) %></p>
+    <% if (error) { %><p class="form-error"><%= error %></p><% } %>
+
+    <form method="post" action="/verify-email" class="form">
+      <%- include('partials/csrf') %>
+      <label class="field">
+        <span><%= t('auth_verify_code') %></span>
+        <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus autocomplete="one-time-code">
+      </label>
+      <button type="submit" class="btn btn-primary btn-block"><%= t('auth_verify_btn') %></button>
+    </form>
+
+    <form method="post" action="/verify-email/resend" class="inline-form">
+      <%- include('partials/csrf') %>
+      <p class="auth-alt"><button type="submit" class="link-btn"><%= t('auth_forgot_resend') %></button></p>
+    </form>
+
+    <form method="post" action="/logout" class="inline-form">
+      <%- include('partials/csrf') %>
+      <p class="auth-alt"><button type="submit" class="link-btn"><%= t('auth_verify_wrong_email') %></button></p>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
