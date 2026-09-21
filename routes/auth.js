@@ -7,7 +7,7 @@ const {
   getUserByEmail, setResetCode, verifyResetCode, clearResetCode, setUserPassword,
   setEmailVerifyCode, verifyEmailCode, markEmailVerified,
 } = require('../lib/db');
-const { sendMail } = require('../lib/mailer');
+const { sendMail, available: mailerAvailable } = require('../lib/mailer');
 const { requireSession } = require('../lib/auth');
 const {
   loginLimiter, registerLimiter, forgotPasswordLimiter, resetPasswordLimiter, verifyEmailLimiter,
@@ -44,6 +44,14 @@ router.post('/register', registerLimiter, (req, res) => {
     });
     if (['ar', 'en'].includes(res.locals.lang)) setUserLang(user.id, res.locals.lang);
     req.session.userId = user.id;
+    if (!mailerAvailable) {
+      // No working mail sender configured — a code would never arrive, so
+      // don't strand the user on /verify-email waiting for one.
+      // requireUser's own self-heal covers this too, but handling it here
+      // skips the pointless detour instead of relying on the next request.
+      markEmailVerified(user.id);
+      return res.redirect(next);
+    }
     req.session.postVerifyNext = next;
     sendVerifyMail(res, user);
     return res.redirect('/verify-email');
@@ -77,10 +85,13 @@ router.post('/login', loginLimiter, (req, res) => {
     });
   }
   req.session.userId = user.id;
-  // requireUser bounces an unverified user to /verify-email regardless of
-  // `next` — stash it so a successful verification can still land them
-  // where they were originally headed instead of always /dashboard.
-  if (!user.email_verified) req.session.postVerifyNext = next;
+  if (!user.email_verified) {
+    if (!mailerAvailable) markEmailVerified(user.id);
+    // requireUser bounces an unverified user to /verify-email regardless of
+    // `next` — stash it so a successful verification can still land them
+    // where they were originally headed instead of always /dashboard.
+    else req.session.postVerifyNext = next;
+  }
   return res.redirect(next);
 });
 

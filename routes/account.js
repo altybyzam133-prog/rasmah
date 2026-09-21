@@ -2,8 +2,8 @@
 
 const express = require('express');
 const crypto = require('crypto');
-const { db, updateProfile, setUserPassword, setUserLang, verifyUserById, deleteUser, setEmailVerifyCode } = require('../lib/db');
-const { sendMail } = require('../lib/mailer');
+const { db, updateProfile, setUserPassword, setUserLang, verifyUserById, deleteUser, setEmailVerifyCode, markEmailVerified } = require('../lib/db');
+const { sendMail, available: mailerAvailable } = require('../lib/mailer');
 const { requireUser } = require('../lib/auth');
 
 const router = express.Router();
@@ -34,9 +34,17 @@ router.post('/profile', (req, res) => {
     const u = updateProfile(res.locals.user.id, { name: req.body.name, email: req.body.email });
     res.locals.user = u;
     if (u.email_lower !== prevEmailLower) {
-      // updateProfile already reset email_verified to 0 for us — send a
-      // fresh code for the new address so requireUser's verify gate (which
-      // now applies again) has something to check against.
+      // updateProfile already reset email_verified to 0 for us.
+      if (!mailerAvailable) {
+        // Can't actually verify right now — don't lock the user out of
+        // their own account over a check we have no way to satisfy.
+        markEmailVerified(u.id);
+        u.email_verified = 1;
+        res.locals.user = u;
+        return render(req, res, { ok: res.locals.t('acc_saved') });
+      }
+      // Send a fresh code for the new address so requireUser's verify gate
+      // (which now applies again) has something to check against.
       const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
       setEmailVerifyCode(u.id, code);
       sendMail({
